@@ -1,1 +1,9 @@
 .venv/
+.env
+
+.env/
+.env
+Music/
+
+.idea/
+.idea
