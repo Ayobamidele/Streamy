@@ -45,4 +45,4 @@ def test_track():
 		print("[*] ERROR OCCURRED. MISSING TRACK LINK !\n\n\n", error)
 
 
-test_Album()
+# test_Album()
