@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat&family=Dela+Gothic+One&family=Satisfy&family=Varela+Round&display=swap');
+@import "https://unpkg.com/open-props";
+@import "https://unpkg.com/open-props/normalize.min.css";
+
+.scrollport {
+	/* -webkit-mask-image: linear-gradient(to right, #0000, #000, #000, #0000); */
+
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+
+	/* display: flex; */
+	/* gap: var(--size-1); */
+	/* align-items: start; */
+	/* padding: var(--size-10); */
+}
+
+.scrollport  div {
+	border: none;
+}
+
+html, .home-hero{
+	/* font-family: 'Caveat', cursive !important; */
+	font-family: 'Dela Gothic One', sans-serif!important;
+	/* font-family: 'Satisfy', cursive!important; */
+	/* font-family: 'Varela Round', sans-serif!important; */
+
+
+}
+
+.home-hero{
+	background-image: url('..\\image\\spotify-header-lg.jpg');
+	background-size: cover;
+}
+
+
+.card {
+	background-color: #fff;
+	box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+	/* position: absolute; */
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	/* max-width: 300px; */
+	/* height: 375px; */
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.card .about {
+	height: 225px;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.card .about h3,
+.card .about .lead {
+	font-weight: 300;
+	margin: 0;
+}
+
+.card .about h3 {
+	font-size: 24px;
+}
+
+.card .about .lead {
+	color: #aaa;
+}
+
+.card .info {
+	float: left;
+	padding: 10px 30px 10px 0;
+}
+
+.card .info p {
+	font-size: 11px;
+	color: #aaa;
+	font-weight: 300;
+}

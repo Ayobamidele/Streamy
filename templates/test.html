@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Download Progress</title>
+</head>
+<body>
+    <h1>Download Progress</h1>
+    <p id="status">Waiting for download...</p>
+    <p id="progress">0%</p>
+    <button onclick="updateUIWithDownloadProgress('https://storage.googleapis.com/pr-newsroom-wp/1/2022/11/Pink_Yellow-Generic-Header-1440x820-2-1440x733.png')">Start Download</button>
+
+    <script>
+        function updateUIWithDownloadProgress(url) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/download_file/' + encodeURIComponent(url), true);
+            xhr.onprogress = function (e) {
+                if (e.lengthComputable) {
+                    var percentComplete = (e.loaded / e.total) * 100;
+                    document.getElementById('progress').textContent = percentComplete.toFixed(2) + '%';
+                }
+            };
+            xhr.onloadstart = function (e) {
+                console.log('Download started');
+                document.getElementById('status').textContent = 'Download started';
+            };
+            xhr.onloadend = function (e) {
+                console.log('Download ended');
+                document.getElementById('status').textContent = 'Download completed';
+            };
+            xhr.onerror = function (e) {
+                console.log('Download failed');
+                document.getElementById('status').textContent = 'Download failed';
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

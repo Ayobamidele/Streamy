@@ -4,11 +4,80 @@ import os
 import re
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
+from mutagen.mp3 import MP3
 import string
 
-class MusicScraper:
+
+
+class WritingMetaTags():
+	def __init__(self, tags, filename):
+		super().__init__()
+		self.tags = tags
+		self.filename = filename
+		self.PICTUREDATA = None
+		self.url = None
+
+	def setPIC(self):
+		if self.tags['cover'] is None:
+			pass
+		else:
+			try:
+				response = requests.get(self.tags['cover'] + "?size=1", stream=True)
+				if response.status_code == 200:
+					audio = ID3(self.filename)
+					audio['APIC'] = APIC(
+						encoding=3,
+						mime='image/jpeg',
+						type=3,
+						desc=u'Cover',
+						data=response.content
+					)
+					audio.save()
+
+			except Exception as e:
+				print(f"Error adding cover: {e}")
+
+	def add_flac_cover(self):
+		if self.tags['cover'] is None:
+			pass
+		else:
+			try:
+				response = requests.get(self.tags['cover'] + "?size=1", stream=True)
+				if response.status_code == 200:
+					audio = MP3(self.filename, ID3=ID3)
+					audio.tags.add(
+						APIC(
+							encoding=3,
+							mime="image/jpeg",
+							type=3,
+							desc="Cover",
+							data=response.content,
+						)
+					)
+					audio.save(self.filename, v2_version=3, v1=2)
+			except Exception as e:
+				print(f"Error adding cover: {e}")
+
+	def WritingMetaTags(self):
+		try:
+			# print('[*] FileName : ', self.filename)
+			audio = EasyID3(self.filename)
+			audio['title'] = self.tags['title']
+			audio['artist'] = self.tags['artists']
+			audio['album'] = self.tags['album']
+			audio['date'] = self.tags['releaseDate']
+			audio.save()
+			self.setPIC()
+			self.add_flac_cover()
+
+		except Exception as e:
+			print(f'Error {e}')
+
+
+
+class PlaylistScraper:
 	def __init__(self):
-		super(MusicScraper, self).__init__()
+		super(PlaylistScraper, self).__init__()
 		self.counter = 0  # Initialize the counter to zero
 		self.session = requests.Session()
 
@@ -162,13 +231,15 @@ class MusicScraper:
 		print('[*] Status Code : ', x.status_code, x.content)
 		return None
 
-	def scrape_playlist(self, spotify_playlist_link, music_folder):
+	def scrape_playlist(self, spotify_playlist_link):
 		ID = self.returnSPOT_ID(spotify_playlist_link)
 		PlaylistName = self.get_PlaylistMetadata(ID)
 		print('Playlist Name : ', PlaylistName)
 		# Create Folder for Playlist
+		music_folder = os.path.join(os.getcwd(), 'music', 'playlists')
 		if not os.path.exists(music_folder):
 			os.makedirs(music_folder)
+			# Create Folder for Album
 		try:
 			FolderPath = ''.join(e for e in PlaylistName if e.isalnum() or e in [' ', '_'])
 			playlist_folder_path = os.path.join(music_folder, FolderPath)
@@ -275,7 +346,7 @@ class MusicScraper:
 		# # The 'returnSPOT_ID' function from your scraper code
 
 		# Define the regular expression pattern for the Spotify playlist URL
-		pattern = r"https://open\.spotify\.com/playlist/([a-zA-Z0-9]+)\?si=.*"
+		pattern = r"https://open\.spotify\.com/playlist/([a-zA-Z0-9]+)"
 
 		# Try to match the pattern in the input text
 		match = re.match(pattern, link)
@@ -290,46 +361,3 @@ class MusicScraper:
 	def increment_counter(self):
 		self.counter += 1
 
-
-# Scraper Thread
-class WritingMetaTags():
-	def __init__(self, tags, filename):
-		super().__init__()
-		self.tags = tags
-		self.filename = filename
-		self.PICTUREDATA = None
-		self.url = None
-
-	def setPIC(self):
-		if self.tags['cover'] is None:
-			pass
-		else:
-			try:
-				response = requests.get(self.tags['cover'] + "?size=1", stream=True)
-				if response.status_code == 200:
-					audio = ID3(self.filename)
-					audio['APIC'] = APIC(
-						encoding=3,
-						mime='image/jpeg',
-						type=3,
-						desc=u'Cover',
-						data=response.content
-					)
-					audio.save()
-
-			except Exception as e:
-				print(f"Error adding cover: {e}")
-
-	def WritingMetaTags(self):
-		try:
-			# print('[*] FileName : ', self.filename)
-			audio = EasyID3(self.filename)
-			audio['title'] = self.tags['title']
-			audio['artist'] = self.tags['artists']
-			audio['album'] = self.tags['album']
-			audio['date'] = self.tags['releaseDate']
-			audio.save()
-			self.setPIC()
-
-		except Exception as e:
-			print(f'Error {e}')
