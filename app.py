@@ -3,7 +3,8 @@ import time
 from flask_session import Session
 from utitlity import detect_and_download
 import os
-import requests, json
+import requests
+import json
 from downloaders.track import track_download
 from functools import wraps
 import base64
@@ -13,6 +14,7 @@ from mutagen.mp3 import MP3
 import eyed3
 from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)
