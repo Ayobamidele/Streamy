@@ -28,51 +28,12 @@
 									<div>
 										<h1 class="text-gray-600 font-medium truncate">{{i.name}}</h1>
 									</div>
-									<div class="flex items-center justify-between">
-										<div class="flex">
-											<a target="_blank" href="{{ url_for('album', id=i.id) }}">
-												{{i.id}}
-												<span class="uppercase my-auto text-xs bg-green-50 p-0.5 border-green-500 border rounded text-green-700 font-medium block">Album</span>
+									<div class="flex items-center justify-between py-2">
+										<div class="w-full">
+											<a class="m-0 p-0" target="_blank" href="{{ url_for('album', id=i.id) }}">
+												<span class="uppercase my-auto text-xs bg-green-50 p-0.5 border-green-500 border rounded text-green-700 font-medium block text-center">View Album</span>
 											</a>
-											<a target="_blank" href="{{ i.url }}" class=" mx-2 text-gray-400 text-sm my-1 block"> <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path d="M24 0v24H0V0h24ZM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018Zm.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022Zm-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01l-.184-.092Z"/><path fill="currentColor" d="M10.232 10.231a5 5 0 0 1 6.89-.172l.181.172l2.828 2.829a5 5 0 0 1-6.89 7.243l-.18-.172l-2.122-2.122a1 1 0 0 1 1.32-1.497l.094.083l2.122 2.122a3 3 0 0 0 4.377-4.1l-.135-.143l-2.828-2.828a3 3 0 0 0-4.243 0a1 1 0 0 1-1.414-1.415ZM3.868 3.867a5 5 0 0 1 6.89-.172l.181.172L13.06 5.99a1 1 0 0 1-1.32 1.497l-.094-.083l-2.121-2.121A3 3 0 0 0 5.147 9.38l.135.144l2.829 2.829a3 3 0 0 0 4.242 0a1 1 0 1 1 1.415 1.414a5 5 0 0 1-6.89.172l-.182-.172l-2.828-2.829a5 5 0 0 1 0-7.07Z"/></g></svg></a>
 										</div>
-										{{ (i.name,'album',i.url)|folders_exist|safe }}
-									</div>
-								</div>
-							</div>
-
-						</div>
-						{% endfor %}
-					</div>
-				</div>
-
-				<div class=" type-card mt-10">
-					<h2 class="text-left">Playlists</h2>
-					<div class="data-slide flex overflow-y-scroll scrollport">
-						{% for i in data.playlists %}
-						<div class="data-card max-w-2-sm p-2">
-							<div class="w-80 bg-white shadow rounded border border-transparent cursor-pointer">
-								<div class="h-80 w-full bg-gray-200 flex flex-col justify-between p-4 bg-cover bg-center"
-									style="background-image: url('{{i.image}}')">
-
-								</div>
-								<div class="p-4 text-left">
-									<div>
-										<h1 class="text-gray-600 font-medium truncate">{{i.name}}</h1>
-									</div>
-									<div class="flex items-center justify-between">
-										<div class="flex">
-											<span
-												class="uppercase my-auto text-xs bg-green-50 p-0.5 border-green-500 border rounded text-green-700 font-medium">Album</span>
-											<a target="_blank" href="{{ i.url }}" class=" mx-2 text-gray-400 text-sm my-1"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none"><path d="M24 0v24H0V0h24ZM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018Zm.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022Zm-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01l-.184-.092Z"/><path fill="currentColor" d="M10.232 10.231a5 5 0 0 1 6.89-.172l.181.172l2.828 2.829a5 5 0 0 1-6.89 7.243l-.18-.172l-2.122-2.122a1 1 0 0 1 1.32-1.497l.094.083l2.122 2.122a3 3 0 0 0 4.377-4.1l-.135-.143l-2.828-2.828a3 3 0 0 0-4.243 0a1 1 0 0 1-1.414-1.415ZM3.868 3.867a5 5 0 0 1 6.89-.172l.181.172L13.06 5.99a1 1 0 0 1-1.32 1.497l-.094-.083l-2.121-2.121A3 3 0 0 0 5.147 9.38l.135.144l2.829 2.829a3 3 0 0 0 4.242 0a1 1 0 1 1 1.415 1.414a5 5 0 0 1-6.89.172l-.182-.172l-2.828-2.829a5 5 0 0 1 0-7.07Z"/></g></svg></a>
-										</div>
-										<button data-url="{{ i.url }}"
-											class="text-gray-500 hover:text-gray-900 download"> <svg
-												xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-												viewBox="0 0 256 256">
-												<path fill="currentColor"
-													d="M222 152v56a14 14 0 0 1-14 14H48a14 14 0 0 1-14-14v-56a6 6 0 0 1 12 0v56a2 2 0 0 0 2 2h160a2 2 0 0 0 2-2v-56a6 6 0 0 1 12 0Zm-98.24 4.24a6 6 0 0 0 8.48 0l40-40a6 6 0 0 0-8.48-8.48L134 137.51V40a6 6 0 0 0-12 0v97.51l-29.76-29.75a6 6 0 0 0-8.48 8.48Z" />
-												</svg></button>
 									</div>
 								</div>
 							</div>

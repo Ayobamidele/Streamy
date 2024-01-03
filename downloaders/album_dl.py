@@ -221,7 +221,7 @@ class AlbumScraper:
 		albumName = self.get_AlbumMetadata(f'https://api.spotifydown.com/metadata/album/{albumID}')
 		print('Album Name : ', albumName)
 		# Create Folder for Album
-		music_folder = os.path.join(os.getcwd(), "music", 'album')
+		music_folder = os.path.join(os.getcwd(), "tmp", "music", 'album')
 		if not os.path.exists(music_folder):
 			os.makedirs(music_folder)
 		try:

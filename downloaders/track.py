@@ -194,7 +194,7 @@ class AlbumScraper:
 		print('Track Name : ', trackName.get("title"))
 		# Create Folder for Track
 		if self.static:
-			music_folder = os.path.join(os.getcwd(), "static","music", 'track')
+			music_folder = os.path.join(os.getcwd(), "tmp","music", 'track')
 			if not os.path.exists(music_folder):
 				os.makedirs(music_folder)
 			
@@ -210,7 +210,7 @@ class AlbumScraper:
 			filepath = os.path.join(track_folder_path, filename)
 		else:
 			print("static")
-			music_folder = os.path.join(os.getcwd(), "music", 'track')
+			music_folder = os.path.join(os.getcwd(),"tmp", "music", 'track')
 			if not os.path.exists(music_folder):
 				os.makedirs(music_folder)
 			try:
@@ -284,10 +284,11 @@ class AlbumScraper:
 		print('[*] Download Complete!')
 		print("*" * 100)
 		full_path = r"{}".format(filepath)
-		# Find the index of "static" in the string
-		index = full_path.find(r'\static')
-		if index != -1:
-			return full_path, full_path[index + 8:].replace('\\','/')
+		parts = full_path.split("\\")
+		index = parts.index("tmp")
+		subpath = parts[index + 1:]
+		result = "/".join(subpath)
+		return full_path, result
 
 
 		

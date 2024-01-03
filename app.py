@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify, send_from_directory
 import time
 from flask_session import Session
 from utitlity import detect_and_download
@@ -34,7 +34,6 @@ download_progress = 0
 
 download_in_progress = []
 downloaded = {}
-
 
 
 def isMp3Valid(file_path):
@@ -181,7 +180,7 @@ def track_folders_exist(folders):
 	folder_name = folders[2]
 	track_duration = folders[3]
 	folder_name = "".join(e for e in folder_name if e.isalnum() or e in [" ", "_"])
-	folder_path = os.path.join(os.getcwd(), "music", "album", folder_name)
+	folder_path = os.path.join(os.getcwd(),"tmp" ,"music", "album", folder_name)
 	if os.path.exists(folder_path):
 		"""If it has been downloaded"""
 		for file_name in os.listdir(folder_path):
@@ -337,6 +336,7 @@ def tracks():
 # home
 @app.route("/")
 def home():
+	# print(request.remote_addr)
 	return render_template("home.html")
 
 
@@ -345,20 +345,21 @@ def home():
 
 @app.route("/authorize")
 def authorize():
-    """Create and return the Spotify authorize URL."""
-    # set the scope to read the user's library
-    scope = "user-library-read"
-    # set the redirect URI to the /tokens endpoint
-    redirect_uri = "http://{domain}/tokens/"
-    # create the authorize URL with the parameters
-    authorize_url = (
-        "https://accounts.spotify.com/authorize?response_type=code&client_id="
-        + SPOTIFY_CLIENT_ID
-        + "&scope=" + scope
-        + "&redirect_uri=" + redirect_uri
-    )
-    # return a redirect response to the authorize URL
-    return redirect(authorize_url)
+	"""Create and return the Spotify authorize URL."""
+	domain = request.host_url
+	# set the scope to read the user's library
+	scope = "user-library-read"
+	# set the redirect URI to the /tokens endpoint
+	redirect_uri = f"{domain}tokens/"
+	# create the authorize URL with the parameters
+	authorize_url = (
+		"https://accounts.spotify.com/authorize?response_type=code&client_id="
+		+ SPOTIFY_CLIENT_ID
+		+ "&scope=" + scope
+		+ "&redirect_uri=" + redirect_uri
+	)
+	# return a redirect response to the authorize URL
+	return redirect(authorize_url)
 
 
 
@@ -366,11 +367,12 @@ def authorize():
 @app.route("/tokens/")
 def tokens():
 	authorizationCode = request.args.get("code")
+	domain = request.host_url
 	response = requests.post(
 		url="https://accounts.spotify.com/api/token",
 		data={
 			"code": str(authorizationCode),
-			"redirect_uri": f"http://{hostname}:5000/tokens/",
+			"redirect_uri": f"{domain}tokens/",
 			"grant_type": "authorization_code",
 			"client_id": SPOTIFY_CLIENT_ID,
 			"client_secret": SPOTIFY_CLIENT_SECRET,
@@ -464,10 +466,10 @@ def find_file(directory, filename):
 				filepath = os.path.join(root, file)
 				full_path = r"{}".format(filepath)
 				# Find the index of "static" in the string
-				index = full_path.find(r'\static')
+				index = full_path.find(r'\tmp')
 				if index != -1:
 					# Add 8 to the index to account for the length of the string "\static\"
-					return url_for("static", filename=full_path[index + 8:].replace('\\','/'))
+					return url_for("serve_tmp_file", filename=full_path[index + 8:].replace('\\','/'))
 	return False
 
 
@@ -503,7 +505,7 @@ def get_tracks(url):
 				'track_duration': calculate_duration(track.get('duration_ms')),
 				'track_url': track.get('external_urls')['spotify'],
 				'track_artists':[i.get("name") for i in track.get('artists')],
-				'track_file': find_file( os.path.join(os.getcwd(), "static", "music", 'track'), track['id']),
+				'track_file': find_file( os.path.join(os.getcwd(), "tmp", "music", 'track'), track['id']),
 			})
 		url = data.get('next')
 	return tracks
@@ -534,9 +536,10 @@ def download_track():
 			confirm = True
 			return True 
 		confirm = False
+		print(confirm, track,file_path)
 		break		
-	track = url_for('static', filename=track)
-	print(track)
+	track = url_for('serve_tmp_file', filename=track)
+	print(track,"fot")
 	return {"message": "Success", "track_path": track}
 
 
@@ -548,10 +551,20 @@ def save_track():
 		return {"message": "Success"}
 
 
+@app.route("/tmp/<path:filename>")
+def serve_tmp_file(filename):
+	"""Serve any file under the tmp folder."""
+	# get the tmp folder path
+	tmp_folder = os.path.join(os.getcwd(), "tmp")
+	if not os.path.exists(tmp_folder):
+		os.makedirs(tmp_folder)
+	# return the file from the tmp folder
+	return send_from_directory(tmp_folder, filename)
+
 
 # Run the app when the script is executed
-# if __name__ == "__main__":
-# 	app.jinja_env.auto_reload = True
-# 	app.config["TEMPLATES_AUTO_RELOAD"] = True
-# 	# download_file("https://share33.com/2023/Busta%20Rhymes%20-%20BLOCKBUSTA%20-%20(SongsLover.com).zip", "bigfile.zip")
-# 	app.run(debug=True)
+if __name__ == "__main__":
+	app.jinja_env.auto_reload = True
+	app.config["TEMPLATES_AUTO_RELOAD"] = True
+	# download_file("https://share33.com/2023/Busta%20Rhymes%20-%20BLOCKBUSTA%20-%20(SongsLover.com).zip", "bigfile.zip")
+	app.run(debug=True)
