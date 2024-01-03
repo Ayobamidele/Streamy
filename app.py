@@ -19,8 +19,9 @@ import socket
 hostname = socket.gethostname()
 load_dotenv()
 app = Flask(__name__)
-SESSION_TYPE = "filesystem"
 app.config.from_object(__name__)
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = '/tmp'
 Session(app)
 
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
