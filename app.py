@@ -341,16 +341,25 @@ def home():
 
 
 # authorize
+
+
 @app.route("/authorize")
 def authorize():
-	# user-library-read is the "scope authorization" to retrieve infos like ALBUMS
-	# redirect_uri is encoded, but correspond to http://localhost:5000/tokens
-	AUTHORIZE_URL = (
-		"https://accounts.spotify.com/authorize?response_type=code&client_id="
-		+ SPOTIFY_CLIENT_ID
-		+ "&scope=user-library-read&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Ftokens%2F"
-	)
-	return redirect(AUTHORIZE_URL)
+    """Create and return the Spotify authorize URL."""
+    # set the scope to read the user's library
+    scope = "user-library-read"
+    # set the redirect URI to the /tokens endpoint
+    redirect_uri = "http://{domain}/tokens/"
+    # create the authorize URL with the parameters
+    authorize_url = (
+        "https://accounts.spotify.com/authorize?response_type=code&client_id="
+        + SPOTIFY_CLIENT_ID
+        + "&scope=" + scope
+        + "&redirect_uri=" + redirect_uri
+    )
+    # return a redirect response to the authorize URL
+    return redirect(authorize_url)
+
 
 
 # tokens
