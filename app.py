@@ -13,7 +13,10 @@ from mutagen.id3 import ID3, ID3NoHeaderError
 from mutagen.mp3 import MP3
 import eyed3
 from dotenv import load_dotenv
+import socket
 
+# get the hostname of the local machine
+hostname = socket.gethostname()
 load_dotenv()
 app = Flask(__name__)
 SESSION_TYPE = "filesystem"
@@ -345,8 +348,7 @@ def authorize():
 	AUTHORIZE_URL = (
 		"https://accounts.spotify.com/authorize?response_type=code&client_id="
 		+ SPOTIFY_CLIENT_ID
-		+ "&scope=user-library-read&redirect_uri=https%3A%2F%2Fstreamy-seven.vercel.app%2Ftokens%2F"
-		
+		+ "&scope=user-library-read&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Ftokens%2F"
 	)
 	return redirect(AUTHORIZE_URL)
 
@@ -359,7 +361,7 @@ def tokens():
 		url="https://accounts.spotify.com/api/token",
 		data={
 			"code": str(authorizationCode),
-			"redirect_uri": "https://streamy-seven.vercel.app/tokens/",
+			"redirect_uri": f"http://{hostname}:5000/tokens/",
 			"grant_type": "authorization_code",
 			"client_id": SPOTIFY_CLIENT_ID,
 			"client_secret": SPOTIFY_CLIENT_SECRET,
@@ -539,8 +541,8 @@ def save_track():
 
 
 # Run the app when the script is executed
-if __name__ == "__main__":
-	app.jinja_env.auto_reload = True
-	app.config["TEMPLATES_AUTO_RELOAD"] = True
-	# download_file("https://share33.com/2023/Busta%20Rhymes%20-%20BLOCKBUSTA%20-%20(SongsLover.com).zip", "bigfile.zip")
-	app.run(debug=True)
+# if __name__ == "__main__":
+# 	app.jinja_env.auto_reload = True
+# 	app.config["TEMPLATES_AUTO_RELOAD"] = True
+# 	# download_file("https://share33.com/2023/Busta%20Rhymes%20-%20BLOCKBUSTA%20-%20(SongsLover.com).zip", "bigfile.zip")
+# 	app.run(debug=True)
