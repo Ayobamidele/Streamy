@@ -284,10 +284,12 @@ class AlbumScraper:
 		print('[*] Download Complete!')
 		print("*" * 100)
 		full_path = r"{}".format(filepath)
+		print(full_path, "hgfderiuy")
 		parts = full_path.split("\\")
 		index = parts.index("tmp")
 		subpath = parts[index + 1:]
 		result = "/".join(subpath)
+		print(result, "iopouytr")
 		return full_path, result
 
 
