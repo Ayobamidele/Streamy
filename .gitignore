@@ -1,0 +1,10 @@
+flask_session/
+__pycache__/
+myenv
+.venv/
+.env
+# .gitignore
+.vscode/
+.idea/
+static/music/
+tmp/music/track
