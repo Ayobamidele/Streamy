@@ -14,6 +14,8 @@ from mutagen.mp3 import MP3
 import eyed3
 from dotenv import load_dotenv
 import socket
+from urllib.parse import urlencode
+
 
 # get the hostname of the local machine
 hostname = socket.gethostname()
@@ -348,17 +350,16 @@ def home():
 def authorize():
 	"""Create and return the Spotify authorize URL."""
 	domain = request.host_url
-	# set the scope to read the user's library
 	scope = "user-library-read"
-	# set the redirect URI to the /tokens endpoint
 	redirect_uri = f"{domain}tokens/"
-	# create the authorize URL with the parameters
-	authorize_url = (
-		"https://accounts.spotify.com/authorize?response_type=code&client_id="
-		+ SPOTIFY_CLIENT_ID
-		+ "&scope=" + scope
-		+ "&redirect_uri=" + redirect_uri
-	)
+	query_parameters = {
+		"response_type": "code",
+		"client_id": SPOTIFY_CLIENT_ID,
+		"scope": scope,
+		"redirect_uri": redirect_uri,
+	}
+	authorize_url = "https://accounts.spotify.com/authorize?" + urlencode(query_parameters)
+	print(authorize_url)
 	# return a redirect response to the authorize URL
 	return redirect(authorize_url)
 
@@ -564,8 +565,17 @@ def serve_tmp_file(filename):
 
 
 # Run the app when the script is executed
+
 if __name__ == "__main__":
-	app.jinja_env.auto_reload = True
-	app.config["TEMPLATES_AUTO_RELOAD"] = True
-	# download_file("https://share33.com/2023/Busta%20Rhymes%20-%20BLOCKBUSTA%20-%20(SongsLover.com).zip", "bigfile.zip")
-	app.run(debug=True)
+	if os.getenv('FLASK_ENV') == 'production':
+		pass
+		# Run the app on the production server
+		# app.run(host='0.0.0.0', port=os.getenv('PORT', 5000))
+	else:
+		app.jinja_env.auto_reload = True
+		app.config["TEMPLATES_AUTO_RELOAD"] = True
+		# download_file("https://share33.com/2023/Busta%20Rhymes%20-%20BLOCKBUSTA%20-%20(SongsLover.com).zip", "bigfile.zip")
+		# Run the app on localhost for development
+		app.run(debug=True, host='127.0.0.1', port=5000)
+
+
