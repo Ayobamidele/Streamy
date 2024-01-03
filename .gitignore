@@ -3,7 +3,7 @@ __pycache__/
 myenv
 .venv/
 .env
-# .gitignore
+.gitignore
 .vscode/
 .idea/
 static/music/
