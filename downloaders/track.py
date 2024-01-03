@@ -284,24 +284,34 @@ class AlbumScraper:
 		print('[*] Download Complete!')
 		print("*" * 100)
 		full_path = r"{}".format(filepath)
-		print(full_path, "hgfderiuy")
+		# print(full_path, "hgfderiuy")
 		parts = full_path.split("\\")
+		
 
-		directories = full_path.split('/')
+		def get_path_after_music(file_path):
+			# Normalize the file path to handle both Unix-style and Windows-style paths
+			file_path = os.path.normpath(file_path)
 
-		# Check if 'music' is in the directories
-		if 'music' in directories:
-			# Get the index of 'music'
-			music_index = directories.index('music')
-			
-			# Return the path after 'music'
-			return full_path, '/'.join(directories[music_index+1:])
-		else:
-			return False, "The directory 'music' does not exist in the file path."
-		index = parts.index("tmp")
-		subpath = parts[index + 1:]
-		result = "/".join(subpath)
-		print(result, "iopouytr")
+			# Split the file path into directories
+			directories = file_path.split(os.sep)
+
+			# Check if 'music' is in the directories
+			if 'tmp' in directories:
+				# Get the index of 'music'
+				music_index = directories.index('tmp')
+				
+				# Return the path after 'music', using forward slashes
+				return '/'.join(directories[music_index+1:])
+			else:
+				return "The directory 'music' does not exist in the file path."
+
+		result = get_path_after_music(full_path)
+
+
+		# index = parts.index("tmp")
+		# subpath = parts[index + 1:]
+		# result = "/".join(subpath)
+		# print(result, "iopouytr")
 		return full_path, result
 
 
@@ -318,10 +328,10 @@ class AlbumScraper:
 # print(test.scrape_download())
 	
 def track_download(track_url: str, static: bool = True):
-    track = AlbumScraper(track_url, static=static)
-    track = track.scrape_download()
-    if track is not None: # check if track is not None
-        return True, track[1] ,track[0]
-    else:
-        return False, None, None
+	track = AlbumScraper(track_url, static=static)
+	track = track.scrape_download()
+	if track is not None: # check if track is not None
+		return True, track[1] ,track[0]
+	else:
+		return False, None, None
 

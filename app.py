@@ -541,7 +541,7 @@ def download_track():
 		print(confirm, track,file_path)
 		break		
 	track = url_for('serve_tmp_file', filename=track)
-	print(track,"fot")
+	print("\n\nfot")
 	return {"message": "Success", "track_path": track}
 
 
