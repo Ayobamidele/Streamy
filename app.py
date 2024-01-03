@@ -345,7 +345,8 @@ def authorize():
 	AUTHORIZE_URL = (
 		"https://accounts.spotify.com/authorize?response_type=code&client_id="
 		+ SPOTIFY_CLIENT_ID
-		+ "&scope=user-library-read&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Ftokens%2F"
+		+ "&scope=user-library-read&redirect_uri=https%3A%2F%2Fstreamy-seven.vercel.app%2Ftokens%2F"
+		
 	)
 	return redirect(AUTHORIZE_URL)
 
@@ -358,7 +359,7 @@ def tokens():
 		url="https://accounts.spotify.com/api/token",
 		data={
 			"code": str(authorizationCode),
-			"redirect_uri": "http://localhost:5000/tokens/",
+			"redirect_uri": "https://streamy-seven.vercel.app/tokens/",
 			"grant_type": "authorization_code",
 			"client_id": SPOTIFY_CLIENT_ID,
 			"client_secret": SPOTIFY_CLIENT_SECRET,
