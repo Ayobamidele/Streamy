@@ -286,6 +286,18 @@ class AlbumScraper:
 		full_path = r"{}".format(filepath)
 		print(full_path, "hgfderiuy")
 		parts = full_path.split("\\")
+
+		directories = full_path.split('/')
+
+		# Check if 'music' is in the directories
+		if 'music' in directories:
+			# Get the index of 'music'
+			music_index = directories.index('music')
+			
+			# Return the path after 'music'
+			return full_path, '/'.join(directories[music_index+1:])
+		else:
+			return False, "The directory 'music' does not exist in the file path."
 		index = parts.index("tmp")
 		subpath = parts[index + 1:]
 		result = "/".join(subpath)
