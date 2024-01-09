@@ -59,7 +59,14 @@ python app.py
 
 This will start the Flask server, and you can access your app at `localhost:5000` or `localhost:8000` in your web browser.
 
+
+Finally to get it all running read this article to set your Spotify ID and secrets that are needed in the app.py -  https://developer.spotify.com/documentation/web-api/concepts/apps.
+
+
+Once you get them create a .env file and put the ID and secret there making sure to follow the naming conventions as the one described in the app.py for ID and secret.
+
 ## Troubleshooting
 
 - If you encounter any issues, make sure that all dependencies are installed and the virtual environment is activated correctly.
+  
 
