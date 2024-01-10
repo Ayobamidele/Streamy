@@ -218,7 +218,8 @@ function playSong(button) {
 	});
 	console.log(song," 5555555")
 	if (song) {
-		console.log(song)
+		currentSongIndex = queue.findIndex(obj => JSON.stringify(obj) === JSON.stringify(song));
+		console.log(`${currentSongIndex}. ${currentSongTitle} - ${currentSongArtists}` ,song)
 		var params = new URLSearchParams(song).toString(); // Convert the song object to query parameters
 		async function fetchSong() {
 			try {
@@ -248,7 +249,8 @@ function playSong(button) {
 		if (song.track_file === false) {
 			fetchSong();
 			
-		} else {
+		}
+		else {
 			console.log("Now playing: " + song.track_title);
 			audio.src = song.track_file;
 			currentSongArtists.innerText = song.track_artists;
