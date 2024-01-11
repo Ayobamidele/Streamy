@@ -81,6 +81,34 @@ def audio_duration(filepath):
 	return duration.lstrip('0') if duration[0] == '0' else duration
 
 
+def get_token():
+	message = f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_CLIENT_SECRET}"
+	message_bytes = message.encode('ascii')
+	base64_bytes = base64.b64encode(message_bytes)
+	base64_message = base64_bytes.decode('ascii')
+
+	headers = {
+		'Authorization': f'Basic {base64_message}',
+	}
+
+	data = {
+		'grant_type': 'client_credentials'
+	}
+
+	response = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=data)
+	jsonResponse = json.loads(response.content)
+	for key in jsonResponse:
+		if key == "access_token":
+			session["access_token"] = jsonResponse[key]
+		elif key == "refresh_token":
+			session["refresh_token"] = jsonResponse[key]
+		elif key == 'expires_in':
+			session['expires_in'] = jsonResponse[key]
+	return jsonResponse
+
+
+
+
 def refresh_token():
 	data = {
 		'grant_type': 'refresh_token',
@@ -107,12 +135,15 @@ def is_token_expired(token_info):
 def require_valid_token(f):
 	@wraps(f)
 	def decorated_function(*args, **kwargs):
-		token_info = {
-			'access_token': session['access_token'],
-			'expires_at': session['expires_in']
-		}
-		if is_token_expired(token_info):
-			token_info = refresh_token()
+		try:
+			token_info = {
+				'access_token': session['access_token'],
+				'expires_at': session['expires_in']
+			}
+			if is_token_expired(token_info):
+				token_info = refresh_token()
+		except Exception as error:
+			get_token()
 		return f(*args, **kwargs)
 	return decorated_function
 
@@ -336,17 +367,14 @@ def tracks():
 	return jsonResponse
 
 
-# home
-@app.route("/")
-def home():
-	# print(request.remote_addr)
-	return render_template("home.html")
+
+
+
+
+
 
 
 # authorize
-
-
-@app.route("/authorize")
 def authorize():
 	"""Create and return the Spotify authorize URL."""
 	domain = request.host_url.replace('127.0.0.1', 'localhost') if request.host_url.startswith('http://127.0.0.1') else os.getenv('DOMAIN', default=request.host_url)
@@ -366,7 +394,11 @@ def authorize():
 	except Exception as e:
 		return str(e), 400
 
-
+# home
+@app.route("/")
+def home():
+	get_token()
+	return redirect(url_for("search_form"))
 
 
 # tokens
