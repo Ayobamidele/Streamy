@@ -533,6 +533,7 @@ def download_track():
 	# print(song)  # Print the song dictionary 
 	confirm = True
 	while confirm:
+		delete_corrupted_mp3(os.path.join(os.getcwd(), "tmp","music", 'track'))
 		confirm, track, file_path = track_download(song.get("track_url"))
 		if audio_duration(file_path) < song.get('track_duration'):
 			confirm = True
