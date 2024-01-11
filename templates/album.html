@@ -92,12 +92,7 @@
 					<div class="flex-1">
 						{{ i.track_title }}
 					</div>
-					<div class="text-xs text-gray-400">
-						{{ i.track_duration }}
-					</div>
 					
-					{{ (i.track_title, i.track_url, album.name, i.track_duration)|track_folders_exist|safe }}
-
 				</li>
 				{% endfor %}
 			</ul>
