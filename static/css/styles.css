@@ -76,3 +76,9 @@ html, .home-hero{
 	color: #aaa;
 	font-weight: 300;
 }
+
+.waitingForConnection3 {
+	animation: blinker3 1s ease-in-out infinite alternate;  
+}
+
+@keyframes blinker3 { to { opacity: 0; } }

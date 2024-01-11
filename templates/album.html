@@ -40,7 +40,7 @@
 					class="object-cover">
 				<div
 					class="absolute p-4 inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-gray-900 backdrop backdrop-blur-5 text-white">
-					<h3 id="song-title" class="font-bold">-</h3>
+					<h3 id="song-title" class="font-bold">—</h3>
 					<span id="song-artists" class="opacity-70">-</span>
 				</div>
 			</div>
@@ -220,6 +220,7 @@ function playSong(button) {
 	if (song) {
 		currentSongIndex = queue.findIndex(obj => JSON.stringify(obj) === JSON.stringify(song));
 		console.log(`${currentSongIndex}. ${currentSongTitle} - ${currentSongArtists}` ,song)
+		currentSongTitle.classList.add('waitingForConnection3')
 		var params = new URLSearchParams(song).toString(); // Convert the song object to query parameters
 		async function fetchSong() {
 			try {
@@ -248,9 +249,10 @@ function playSong(button) {
 
 		if (song.track_file === false) {
 			fetchSong();
-			
 		}
 		else {
+			currentSongTitle.innerText = "—"
+			currentSongTitle.classList.add('waitingForConnection3')
 			console.log("Now playing: " + song.track_title);
 			audio.src = song.track_file;
 			currentSongArtists.innerText = song.track_artists;
@@ -260,6 +262,7 @@ function playSong(button) {
 				button.classList.add('bg-green-500')
 			}
 		}
+		currentSongTitle.classList.remove('waitingForConnection3')
 
 	}
 }
