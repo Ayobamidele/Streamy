@@ -247,11 +247,11 @@ function playSong(button) {
 			}
 		}
 
+		currentSongTitle.innerText = "—"
 		if (song.track_file === false) {
 			fetchSong();
 		}
 		else {
-			currentSongTitle.innerText = "—"
 			currentSongTitle.classList.add('waitingForConnection3')
 			console.log("Now playing: " + song.track_title);
 			audio.src = song.track_file;
