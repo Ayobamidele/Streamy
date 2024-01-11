@@ -227,35 +227,39 @@ class AlbumScraper:
 			filename = trackName['title'].translate(str.maketrans('', '', string.punctuation)) + ' - ' + trackName[
 				'artists'].translate(str.maketrans('', '', string.punctuation)) + '.mp3'
 			filepath = os.path.join(track_folder_path, filename)
-		if not os.path.isfile(filepath) or self.duration != None:
+		if not os.path.isfile(filepath) or self.duration is not None:
+			song_downloaded = False
+			print(f"{filepath}\n got here")
+			SONG_META = trackName
+			SONG_META['file'] = filepath
+			DL_LINK = None
+
 			try:
-				song_downloaded = True
-				print(filepath,"\n got here")
+				print('Stage One: Setting up Direct Method')
+				V2METHOD = self.V2catch(trackName['id'])
+				DL_LINK = V2METHOD['link']
+			except Exception as e:
+				print('Direct Method failed:', str(e))
+
+			if DL_LINK is None:
+				print('Stage Two: ID prep for Youtube')
+				yt_id = self.get_ID(trackName['id'])
+				if yt_id is not None:
+					print("Stage Three: ", yt_id)
+					data = self.generate_Analyze_id(yt_id)
+					try:
+						DL_ID = data['links']['mp3']['mp3128']['k']
+						DL_DATA = self.generate_Conversion_id(data['vid'], DL_ID)
+						DL_LINK = DL_DATA['dlink']
+					except Exception as NoLinkError:
+						CatchMe = self.errorcatch(trackName['id'])
+						if CatchMe is not None:
+							DL_LINK = CatchMe
+				else:
+					print('[*] No data found for : ', trackName.get("title"))
+
+			if DL_LINK is not None:
 				try:
-					print('Stage One: Setting up Direct Method')
-					V2METHOD = self.V2catch(trackName['id'])
-					DL_LINK = V2METHOD['link']
-					SONG_META = trackName
-					SONG_META['file'] = filepath
-				except:
-					print('Stage Two: ID prep for Youtube')
-					SONG_META = trackName
-					SONG_META['file'] = filepath
-					yt_id = self.get_ID(trackName['id'])
-					if yt_id is not None:
-						print("Stage Three: ", yt_id)
-						data = self.generate_Analyze_id(yt_id)
-						try:
-							DL_ID = data['links']['mp3']['mp3128']['k']
-							DL_DATA = self.generate_Conversion_id(data['vid'], DL_ID)
-							DL_LINK = DL_DATA['dlink']
-						except Exception as NoLinkError:
-							CatchMe = self.errorcatch(trackName['id'])
-							if CatchMe is not None:
-								DL_LINK = CatchMe
-					else:
-						print('[*] No data found for : ', trackName.get("title"))
-				if DL_LINK is not None:
 					## DOWNLOAD
 					link = self.session.get(DL_LINK, stream=True)
 					total_size = int(link.headers.get('content-length', 0))
@@ -266,19 +270,20 @@ class AlbumScraper:
 						for data in link.iter_content(block_size):
 							f.write(data)
 							downloaded += len(data)
-					download_complete = True
+					song_downloaded = True
 					# Increment the counter
 					print("Saved ", filename)
 					self.increment_counter()
-				else:
-					print('[*] No Download Link Found.')
-				if (DL_LINK is not None) & (download_complete == True):
-					songTag = WritingMetaTags(tags=SONG_META, filename=filepath)
-					# add track met
-					songTag.WritingMetaTags()
-			except Exception as error_status:
-				print('[*] Error Status Code : ', error_status)
-				return None
+				except Exception as e:
+					print('Download failed:', str(e))
+
+			if song_downloaded:
+				songTag = WritingMetaTags(tags=SONG_META, filename=filepath)
+				# add track met
+				songTag.WritingMetaTags()
+			else:
+				print('[*] No Download Link Found.')
+
 
 		print("*" * 100)
 		print('[*] Download Complete!')

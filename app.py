@@ -349,7 +349,7 @@ def home():
 @app.route("/authorize")
 def authorize():
 	"""Create and return the Spotify authorize URL."""
-	domain = request.host_url
+	domain = request.host_url.replace('127.0.0.1', 'localhost') if request.host_url.startswith('http://127.0.0.1') else os.getenv('DOMAIN', default=request.host_url)
 	scope = "user-library-read"
 	redirect_uri = f"{domain}tokens/"
 	query_parameters = {
@@ -359,9 +359,13 @@ def authorize():
 		"redirect_uri": redirect_uri,
 	}
 	authorize_url = "https://accounts.spotify.com/authorize?" + urlencode(query_parameters)
-	print(authorize_url)
+
 	# return a redirect response to the authorize URL
-	return redirect(authorize_url)
+	try:
+		return redirect(authorize_url, code=302)
+	except Exception as e:
+		return str(e), 400
+
 
 
 
@@ -382,8 +386,6 @@ def tokens():
 	)
 
 	jsonResponse = json.loads(response.content)
-	print(jsonResponse)
-
 	for key in jsonResponse:
 		if key == "access_token":
 			session["access_token"] = jsonResponse[key]
