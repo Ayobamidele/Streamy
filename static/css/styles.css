@@ -2,21 +2,6 @@
 @import "https://unpkg.com/open-props";
 @import "https://unpkg.com/open-props/normalize.min.css";
 
-.scrollport {
-	/* -webkit-mask-image: linear-gradient(to right, #0000, #000, #000, #0000); */
-
-	overflow-x: auto;
-	overscroll-behavior-x: contain;
-
-	/* display: flex; */
-	/* gap: var(--size-1); */
-	/* align-items: start; */
-	/* padding: var(--size-10); */
-}
-
-.scrollport  div {
-	border: none;
-}
 
 html, .home-hero{
 	/* font-family: 'Caveat', cursive !important; */
@@ -30,6 +15,7 @@ html, .home-hero{
 .home-hero{
 	background-image: url('..\\image\\spotify-header-lg.jpg');
 	background-size: cover;
+	background-position: 50%;
 }
 
 

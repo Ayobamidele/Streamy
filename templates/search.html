@@ -47,12 +47,12 @@
 		</div>
 	</div>
 	{% else %}
-	<div class="hero min-h-screen home-hero">
-		<div class="hero-content text-center text-neutral-content">
+	<div class="min-h-screen home-hero flex items-center justify-center">
+		<div class="hero-content text-center text-neutral-content w-11/12" style="display: block !important;">
 			<form class="grid" action="{{ url_for('search') }}" method="post">
 				<label for="default-search"
 					class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-				<div class="relative">
+				<div class="relative w-full mx-auto">
 					<div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
 						<svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
 							xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -69,6 +69,7 @@
 			</form>
 		</div>
 	</div>
+	
 	{% endif %}
 	<!-- // This function starts the request and calls success on response.
 	var refresh = function() {
