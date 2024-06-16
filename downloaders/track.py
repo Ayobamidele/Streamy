@@ -99,8 +99,94 @@ class AlbumScraper:
 		return None
 	
 	def V2catch(self,track_id):
-		response = self.session.get(f'https://api.spotifydown.com/download/{track_id}', headers=self.headers)
-		return response.json()
+		custom_header = {
+			"authority": "api.spotifydown.com",
+			"method": "POST",
+			"path": '/download/68GdZAAowWDac3SkdNWOwo',
+			"scheme": "https",
+			"Accept": "*/*",
+
+			'Sec-Ch-Ua':'"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
+			"Dnt": '1',
+			"Origin": "https://spotifydown.com",
+			"Referer": "https://spotifydown.com/",
+			"Sec-Ch-Ua-Mobile": "?0",
+			"Sec-Fetch-Dest": "empty",
+			"Sec-Fetch-Mode": "cors",
+			"Sec-Fetch-Site": "cross-site",
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
+		}
+		response = self.session.get(f'https://api.spotifydown.com/download/{track_id}', headers=custom_header)
+		if response.status_code == 200:
+			print( "rerty",response.json())
+			try:
+				return {
+					'link' : response.json()['link'],
+					'metadata' : None
+				}
+			except:
+				return {
+					'link' : None,
+					'metadata' : None
+				}
+
+		return None
+	
+	def V4catch(self, SONG_ID):
+		## Updated .. .19TH OCTOBER 2023
+		# yt_id = self.get_ID(SONG_ID)
+
+		# domain = ["co.wuk.sh", "cobalt2.snapredd.app"]
+		# target_domain = domain[random.randint(0,len(domain) - 1)]
+		headers = {
+			"authority": "api.spotifydown.com",
+			"method": "POST",
+			"path": '/download/68GdZAAowWDac3SkdNWOwo',
+			"scheme": "https",
+			"Accept": "*/*",
+
+			'Sec-Ch-Ua':'"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
+			"Dnt": '1',
+			"Origin": "https://spotifydown.com",
+			"Referer": "https://spotifydown.com/",
+			"Sec-Ch-Ua-Mobile": "?0",
+			"Sec-Fetch-Dest": "empty",
+			"Sec-Fetch-Mode": "cors",
+			"Sec-Fetch-Site": "cross-site",
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
+		}
+
+		## Updated .. .29TH OCTOBER 2023
+		x = self.session.get(url = f'https://api.spotifydown.com/download/{SONG_ID}', headers=headers)
+
+		# if x.status_code == 200:
+
+		#     # par = {
+		#     #     'aFormat':'"mp3"',
+		#     #     'dubLang':'false',
+		#     #     'filenamePattern':'"classic"',
+		#     #     'isAudioOnly':'true',
+		#     #     'isNoTTWatermark':'true',
+		#     #     'url':f'"https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D{yt_id}"'
+		#     # }
+
+		#     file_status = self.session.post(url=f"https://{target_domain}/api/json", json=par, headers=headers)
+		# print('[*] Data Gathered : ', str(x.content))
+		if x.status_code == 200:
+
+			try:
+				return {
+					'link' : x.json()['link'],
+					'metadata' : None
+				}
+			except:
+				return {
+					'link' : None,
+					'metadata' : None
+				}
+
+		return None
+
 	
 	def get_ID(self, yt_id):
 		# The 'get_ID' function from your scraper code
@@ -237,6 +323,7 @@ class AlbumScraper:
 			try:
 				print('Stage One: Setting up Direct Method')
 				V2METHOD = self.V2catch(trackName['id'])
+				print(V2METHOD)
 				DL_LINK = V2METHOD['link']
 			except Exception as e:
 				print('Direct Method failed:', str(e))
@@ -329,7 +416,7 @@ class AlbumScraper:
 
 # download_track('https://open.spotify.com/track/2oSUaquyPEbz1FmKKwwW6y')
 # download_track("https://open.spotify.com/track/2oSUaquyPEbz1FmKKwwW6y?si=333ee1158a494618")
-# test = AlbumScraper("https:/open.spotify.com/track/2oSUaquyPEbz1FmKKwwW6y?si=333ee1158a494618")
+# test = AlbumScraper("https://open.spotify.com/track/10Dx5NK7p72jxzg1ZhQ33G")
 # print(test.scrape_download())
 	
 def track_download(track_url: str, static: bool = True):

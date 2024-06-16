@@ -2,9 +2,18 @@
 <html>
 
 <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="https://cdn.jsdelivr.net/npm/daisyui@2.6.0/dist/full.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdn.tailwindcss.com"></script>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+	<link
+            rel="icon"
+            href=
+"{{ url_for('static', filename='image/streamy-logo_v2.png') }}"
+            type="image/x-icon"
+        />
+	<title>{{ album.name }} - Streamy</title>
 </head>
 
 <body>
@@ -13,31 +22,48 @@
 
 		<div class="relative w-4/6 h-36 bg-white rounded-lg shadow-lg overflow-hidde mb-32">
 			<div class="absolute inset-0 rounded-lg overflow-hidden bg-red-200">
-				<img src="{{album.images[0].url}}"	alt="{{ album.name }}" class=" w-full">
+				{% if album.images|length > 1 %}
+					<img src="{{album.images[0].url}}" alt="{{ album.name }}" class="w-full">
+				{% else %}
+					<img src="" alt="{{ album.name }}" class="w-full">
+				{% endif %}
+
 				<div class="absolute inset-0 backdrop backdrop-blur-10 bg-gradient-to-b from-transparent to-black">
 
 				</div>
 			</div>
 			<div class="absolute flex space-x-6 transform translate-x-6 translate-y-8">
 				<div class="w-36 h-36 rounded-lg shadow-lg overflow-hidden">
-					<img src="{{album.images[0].url}}"	alt="{{ album.name }}">
+				{% if album.images|length > 1 %}
+					<img src="{{album.images[0].url}}" alt="{{ album.name }}" >
+				{% else %}
+					<img src="" alt="{{ album.name }}">
+				{% endif %}
+
 				</div>
 				<div class="text-white pt-12">
-					<h3 class="font-bold">{{ album.name }}</h3>
+					<h3 class="font-bold ">{{ album.name }}</h3>
 					<div class="text-sm opacity-60">{{ album.artists[0].name }}</div>
 					<div class="mt-8 text-gray-400">
 						<div class="items-center space-x-2 text-xs">
-							
+							<button id="download-album" class="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-neutral-950 px-6 font-medium text-neutral-200" onclick="downloadAlbum('{{album.id|safe}}')">
+								<span>Download</span>
+								<div class="ml-1 transition group-hover:translate-x-1">
+									<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="transform: rotate(90deg);">
+										<path d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path>
+									</svg>									
+								</div>
+							</button>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="max-w-xl bg-white rounded-lg shadow-lg overflow-hidden">
+		<div class="w-4/6 bg-white rounded-lg shadow-lg overflow-hidden">
 			<div class="relative">
-				<img src="https://images.unsplash.com/photo-1500099817043-86d46000d58f?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=800&h=250&q=80"
-					class="object-cover">
+				<img src="{{album.images[0].url}}"
+					class="object-cover object-bottom min-h-full min-w-full w-full h-52">
 				<div
 					class="absolute p-4 inset-0 flex flex-col justify-end bg-gradient-to-b from-transparent to-gray-900 backdrop backdrop-blur-5 text-white">
 					<h3 id="song-title" class="font-bold">—</h3>
@@ -57,7 +83,7 @@
 					0:00
 				</div>
 				<div class="flex space-x-3 p-2">
-					<button class="focus:outline-none" onclick="previousSong()">
+					<button class="focus:outline-none px-5" onclick="previousSong()">
 						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 							stroke-linecap="round" stroke-linejoin="round">
 							<polygon points="19 20 9 12 19 4 19 20"></polygon>
@@ -65,10 +91,13 @@
 						</svg>
 					</button>
 					<button id="pausePlay" onclick="playPause()"
-						class="rounded-full w-8 h-8 flex items-center justify-center pl-0.5 ring-2 ring-gray-100 focus:outline-none">
-						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M14.5 18q-.402 0-.701-.299q-.299-.3-.299-.701V7q0-.402.299-.701q.3-.299.701-.299H17q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299h-2.5ZM7 18q-.402 0-.701-.299Q6 17.401 6 17V7q0-.402.299-.701Q6.599 6 7 6h2.5q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299H7Zm7.5-1H17V7h-2.5v10ZM7 17h2.5V7H7v10ZM7 7v10V7Zm7.5 0v10V7Z"/></svg>
+						class="rounded-full w-16 h-16 flex items-center justify-center pl-0.5 ring-2 ring-gray-100 focus:outline-none">
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+							<path fill="currentColor"
+								d="M14.5 18q-.402 0-.701-.299q-.299-.3-.299-.701V7q0-.402.299-.701q.3-.299.701-.299H17q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299h-2.5ZM7 18q-.402 0-.701-.299Q6 17.401 6 17V7q0-.402.299-.701Q6.599 6 7 6h2.5q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299H7Zm7.5-1H17V7h-2.5v10ZM7 17h2.5V7H7v10ZM7 7v10V7Zm7.5 0v10V7Z" />
+							</svg>
 					</button>
-					<button class="focus:outline-none" onclick="nextSong()">
+					<button class="focus:outline-none px-5" onclick="nextSong()">
 						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 							stroke-linecap="round" stroke-linejoin="round">
 							<polygon points="5 4 15 12 5 20 5 4"></polygon>
@@ -82,90 +111,187 @@
 			</div>
 			<ul class="text-xs sm:text-base divide-y border-t cursor-default">
 				{% for i in tracks %}
-				<li class="flex items-center space-x-3 hover:bg-gray-100">
-					<button class="p-3 hover:bg-green-500 group focus:outline-none play-song" data-track={{i.track_id}} onclick="playSong(this)" type="button">
+				<li class="flex items-center space-x-3 min-w-full p-2 hover:bg-gray-100">
+					<button class="p-3 hover:bg-green-500 group focus:outline-none play-song" data-track={{i.track_id}}
+						onclick="playSong(this)" type="button">
 						<svg class="w-4 h-4 group-hover:text-white" viewBox="0 0 24 24" fill="none"
 							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<polygon points="5 3 19 12 5 21 5 3"></polygon>
 						</svg>
 					</button>
-					<div class="flex-1">
+					<div class="flex-1 text-black">
 						{{ i.track_title }}
 					</div>
-					
+
 				</li>
 				{% endfor %}
 			</ul>
 		</div>
 	</div>
 </body>
+<script src="https://cdn.tailwindcss.com/"></script>
 <script>
-var audio = document.getElementById("myAudio");
+	var audio = document.getElementById("myAudio");
 
-// Queue of songs
-var songs = {{tracks| tojson}};
-var queue = {{tracks| tojson}};
- // This should be a list of dictionaries with 'track_number' keys
-var currentSongIndex = 0;
-const progressBar = document.getElementById("track-slider");
-const currentTimeDisplay = document.getElementById("current-time");
-const totalTimeDisplay = document.getElementById("total-time");
-const pausePlayButton = document.getElementById("pausePlay");
-const currentSongTitle = document.getElementById("song-title");
-const currentSongArtists = document.getElementById("song-artists");
+	// Queue of songs
+	var songs = JSON.parse('{{	tracks | tojson | safe }}');
+	var queue = JSON.parse('{{	tracks | tojson | safe }}');
+	// This should be a list of dictionaries with 'track_number' keys
+	var currentSongIndex = 0;
+	const progressBar = document.getElementById("track-slider");
+	const currentTimeDisplay = document.getElementById("current-time");
+	const totalTimeDisplay = document.getElementById("total-time");
+	const pausePlayButton = document.getElementById("pausePlay");
+	const currentSongTitle = document.getElementById("song-title");
+	const currentSongArtists = document.getElementById("song-artists");
+	const downloadBtn = document.getElementById('download-album')
 
-
-progressBar.value = 0;
-
-
-audio.addEventListener('ended', function () {
 	progressBar.value = 0;
-    currentSongIndex++;
-    if (currentSongIndex < queue.length) {
-		console.log("playing ",queue[currentSongIndex]) 
-        playSong(queue[currentSongIndex].track_id);
-    }
-});
-
-audio.addEventListener("timeupdate", () => {
-    const currentTime = audio.currentTime;
-    const duration = audio.duration;
-
-    const currentMinutes = Math.floor(currentTime / 60);
-    const currentSeconds = Math.floor(currentTime % 60);
-    const totalMinutes = Math.floor(duration / 60);
-    const totalSeconds = Math.floor(duration % 60);
-
-    currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
-    totalTimeDisplay.textContent = `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
-
-    const progress = (currentTime / duration) * 100;
-	progressBar.value = progress;
-});
 
 
-// Seek to a position when the user interacts with the track slider
-progressBar.addEventListener("input", function () {
-  const newPosition = (progressBar.value / 100) * audio.duration;
-  audio.currentTime = newPosition;
-});
-
-
-function addToQueue() {
-	var songFiles = document.getElementById("songFiles").files;
-	for (var i = 0; i < songFiles.length; i++) {
-		console.log(songFiles)
-		var track = {
-			'track_number': queue.length + 1,
-			'track_file': URL.createObjectURL(songFiles[i]),
-			'track_title': songFiles[i].name,
-			'track_id': generateId(22)
+	audio.addEventListener('ended', function () {
+		progressBar.value = 0;
+		currentSongIndex++;
+		if (currentSongIndex < queue.length) {
+			console.log("playing ", queue[currentSongIndex])
+			playSong(queue[currentSongIndex].track_id);
 		}
-		queue.push(track);
-		var div = document.getElementById('queue');
+	});
 
-		// The HTML code to be added
-		var htmlCode = `
+	audio.addEventListener("timeupdate", () => {
+		const currentTime = audio.currentTime;
+		const duration = audio.duration;
+
+		const currentMinutes = Math.floor(currentTime / 60);
+		const currentSeconds = Math.floor(currentTime % 60);
+		const totalMinutes = Math.floor(duration / 60);
+		const totalSeconds = Math.floor(duration % 60);
+
+		currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
+		totalTimeDisplay.textContent = `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
+
+		const progress = (currentTime / duration) * 100;
+		progressBar.value = progress;
+	});
+
+
+	// Seek to a position when the user interacts with the track slider
+	progressBar.addEventListener("input", function () {
+		const newPosition = (progressBar.value / 100) * audio.duration;
+		audio.currentTime = newPosition;
+	});
+
+
+	function downloadAlbum(id) {
+		var data = {
+			'id': id,
+			'type': 'album'
+		};
+
+		async function download() {
+			try {
+				let response = await fetch("{{url_for('download')}}", { // Append the parameters to the URL
+
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(data),
+				});
+				let responseData = await response
+			.json(); // Changed variable name to avoid conflict
+				console.log(responseData)
+
+				var html_element = `<div class="w-full max-w-sm">
+					<div class="mb-2 flex justify-between items-center">
+						<label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Copy & paste link to new tab to download:</label>
+					</div>
+					<div class="flex items-center">
+						<span class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">URL</span>
+						<div class="relative w-full">
+							<input id="website-url" type="text" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-e-0 border-gray-300 text-gray-500 dark:text-gray-400 text-sm border-s-0 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" value="${responseData.link}" readonly disabled />
+						</div>
+						
+						<button class="flex-shrink-0 z-10 inline-flex items-center py-3 px-4 text-sm font-medium text-center text-white bg-blue-700 rounded-e-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 border border-blue-700 dark:border-blue-600 hover:border-blue-800 dark:hover:border-blue-700" onclick="copyTextToClipboard('${responseData.link}')" onmouseout="hideTooltip()">
+							<span id="default-icon">
+								<svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+									<path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
+								</svg>
+							</span>
+							<span id="success-icon" class="hidden inline-flex items-center">
+								<svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+								</svg>
+							</span>
+						</button>
+						<span id="tooltip" class="tooltip absolute invisible bg-black text-white text-sm py-2 px-4 rounded-md z-10 transition-opacity duration-300" style="bottom: 100%; left: 50%; transform: translateX(-50%);">Copied!</span>
+					</div>
+				</div>`;
+				downloadBtn.outerHTML = html_element
+				console.log('Success:', responseData)
+
+			} catch (error) {
+				console.error('Error:', error);
+			}
+		}
+
+		download()
+
+		return true
+	}
+
+	document.addEventListener('click', function(event) {
+		if (event.target.matches('.copy-btn')) {
+		copyTextToClipboard(event.target.getAttribute('data-text'));
+		showTooltip(event.target);
+		}
+	});
+	
+	document.addEventListener('mouseout', function(event) {
+		if (event.target.matches('.copy-btn')) {
+		hideTooltip();
+		}
+	});
+	
+	function copyTextToClipboard(text) {
+		const textarea = document.createElement('textarea');
+		textarea.value = text;
+		document.body.appendChild(textarea);
+		textarea.select();
+		document.execCommand('copy');
+		document.body.removeChild(textarea);
+	}
+	
+	function showTooltip(button) {
+		const tooltip = button.nextElementSibling; // Assuming tooltip span is right after button
+		tooltip.classList.remove('invisible');
+		tooltip.classList.add('opacity-100');
+	}
+	
+	function hideTooltip() {
+		const tooltips = document.querySelectorAll('.tooltip');
+		tooltips.forEach(function(tooltip) {
+		tooltip.classList.add('invisible');
+		tooltip.classList.remove('opacity-100');
+		});
+	}
+  
+
+	function addToQueue() {
+		var songFiles = document.getElementById("songFiles").files;
+		for (var i = 0; i < songFiles.length; i++) {
+			console.log(songFiles)
+			var track = {
+				'track_number': queue.length + 1,
+				'track_file': URL.createObjectURL(songFiles[i]),
+				'track_title': songFiles[i].name,
+				'track_id': generateId(22)
+			}
+			queue.push(track);
+			var div = document.getElementById('queue');
+
+			// The HTML code to be added
+			var htmlCode = `
 			<div>
 				<p>
 					${track.track_number}. ${track.track_title}
@@ -174,234 +300,275 @@ function addToQueue() {
 			</div>
 		`;
 
-		// Add the HTML code to the div
-		div.innerHTML += htmlCode;
+			// Add the HTML code to the div
+			div.innerHTML += htmlCode;
+		}
 	}
-}
 
 
-document.addEventListener("keydown", (e) => {
+	document.addEventListener("keydown", (e) => {
 
-  // Ignore keydown events when an input field is focused
-  if (document.activeElement.tagName === 'INPUT') {
-    return;
-  }
+		// Ignore keydown events when an input field is focused
+		if (document.activeElement.tagName === 'INPUT') {
+			return;
+		}
 
-  if ([80].includes(e.which)) { // Only 'P' key is considered
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    audio.paused ? audio.play() : audio.pause();
-    return false;
-  }
-});
-
-
-
-function playSong(button) {
-	var checkElement = false
-	try{
-		console.log("Got here")
-		var trackNumber = button.getAttribute('data-track');
-		checkElement = true
-	} catch(err){
-		console.log("Got here 2", button)
-		var trackNumber = button
-	}
-	var song = queue.find(function(song) {
-		console.log(song.track_id, trackNumber)
-		return song.track_id === trackNumber;
+		if ([80].includes(e.which)) { // Only 'P' key is considered
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			audio.paused ? audio.play() : audio.pause();
+			return false;
+		}
 	});
-	console.log(song," 5555555")
-	if (song) {
-		currentSongIndex = queue.findIndex(obj => JSON.stringify(obj) === JSON.stringify(song));
-		console.log(`${currentSongIndex}. ${currentSongTitle} - ${currentSongArtists}` ,song)
-		currentSongTitle.classList.add('waitingForConnection3')
-		var params = new URLSearchParams(song).toString(); // Convert the song object to query parameters
-		async function fetchSong() {
-			try {
-				let response = await fetch("{{url_for('download_track')}}?" + params, { // Append the parameters to the URL
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				});
-				let data = await response.json();
-				console.log('Success:', data);
-				song.track_file = data.track_path
-				console.log(song)
+
+
+
+	function playSong(button) {
+		var checkElement = false
+		try {
+			console.log("Got here")
+			var trackNumber = button.getAttribute('data-track');
+			checkElement = true
+		} catch (err) {
+			console.log("Got here 2", button)
+			var trackNumber = button
+		}
+		var song = queue.find(function (song) {
+			console.log(song.track_id, trackNumber)
+			return song.track_id === trackNumber;
+		});
+		console.log(song, " 5555555")
+		if (song) {
+			currentSongIndex = queue.findIndex(obj => JSON.stringify(obj) === JSON.stringify(song));
+			console.log(`${currentSongIndex}. ${currentSongTitle} - ${currentSongArtists}`, song)
+			currentSongTitle.classList.add('waitingForConnection3')
+			var params = new URLSearchParams(song).toString(); // Convert the song object to query parameters
+			async function fetchSong() {
+				try {
+					let response = await fetch("{{url_for('download_track')}}?" +
+					params, { // Append the parameters to the URL
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					});
+					let data = await response.json();
+					console.log('Success:', data);
+					song.track_file = data.track_path
+					console.log(song)
+					console.log("Now playing: " + song.track_title);
+					audio.src = song.track_file;
+					currentSongArtists.innerText = song.track_artists;
+					currentSongTitle.innerText = song.track_title;
+					playPause();
+					if (checkElement) {
+						button.classList.add('bg-green-500')
+					}
+				} catch (error) {
+					console.error('Error:', error);
+					console.info('Trying to Connect Again');
+
+					function sendRequest() {
+						fetch("{{ url_for('retrieve') }}", {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify(
+									song
+								),
+							})
+							.then(response => response.json())
+							.then(data => {
+								console.log("Retrieving File ...")
+								console.log('Success:', data);
+								song.track_file = data.track_path
+								console.log(song)
+								console.log("Now playing: " + song.track_title);
+								audio.src = song.track_file;
+								currentSongArtists.innerText = song.track_artists;
+								currentSongTitle.innerText = song.track_title;
+								playPause();
+								if (checkElement) {
+									button.classList.add('bg-green-500')
+								}
+							})
+							.catch((error) => {
+								console.error('Error while retrieveing:', error);
+								// Schedule the next request if an error occurs
+								setTimeout(sendRequest, 3500);
+							});
+					}
+
+					// Call sendRequest immediately
+					sendRequest();
+
+				}
+			}
+
+			if (song.track_file === false) {
+				fetchSong();
+			} else {
+				currentSongTitle.classList.add('waitingForConnection3')
 				console.log("Now playing: " + song.track_title);
 				audio.src = song.track_file;
 				currentSongArtists.innerText = song.track_artists;
 				currentSongTitle.innerText = song.track_title;
-				playPause();
+				playPause(); // Move this line here
 				if (checkElement) {
 					button.classList.add('bg-green-500')
 				}
-			} catch (error) {
-			console.error('Error:', error);
 			}
-		}
+			currentSongTitle.classList.remove('waitingForConnection3')
 
-		if (song.track_file === false) {
-			fetchSong();
 		}
-		else {
-			currentSongTitle.classList.add('waitingForConnection3')
-			console.log("Now playing: " + song.track_title);
-			audio.src = song.track_file;
-			currentSongArtists.innerText = song.track_artists;
-			currentSongTitle.innerText = song.track_title;
-			playPause(); // Move this line here
-			if (checkElement) {
-				button.classList.add('bg-green-500')
-			}
-		}
-		currentSongTitle.classList.remove('waitingForConnection3')
-
 	}
-}
 
 
-function saveSong(button) {
-	var checkElement = false
-	try{
-		console.log("Got here")
-		var trackUrl = button.getAttribute('data-track');
-		checkElement = true
-	} catch(err){
-		console.log("Got here 2", button)
-		var trackUrl = button
-	}
-	var song = queue.find(function(song) {
-		console.log(song.track_url, trackUrl)
-		return song.track_url === trackUrl;
-	});
-	console.log(song," 5555555")
-	if (song) {
-		console.log(song)
-		currentSongIndex = queue.findIndex(obj => JSON.stringify(obj) === JSON.stringify(song));
-		var params = new URLSearchParams(song).toString(); // Convert the song object to query parameters
-		async function saveSong() {
-			try {
-				let response = await fetch("{{url_for('save_track')}}?" + params, { // Append the parameters to the URL
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				});
-				let data = await response.json();
-				console.log('Success:', data);
-				if (checkElement) {
-					console.log('Saved')
-					button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 24 24"><path fill="currentColor" d="M10 15.688L6.712 12.4l.688-.688l2.6 2.6l6.6-6.6l.688.688L10 15.688Z"/></svg>`
-					button.classList.remove('pr-4')
-					button.classList.add('pr-2')
+	function saveSong(button) {
+		var checkElement = false
+		try {
+			console.log("Got here")
+			var trackUrl = button.getAttribute('data-track');
+			checkElement = true
+		} catch (err) {
+			console.log("Got here 2", button)
+			var trackUrl = button
+		}
+		var song = queue.find(function (song) {
+			console.log(song.track_url, trackUrl)
+			return song.track_url === trackUrl;
+		});
+		console.log(song, " 5555555")
+		if (song) {
+			console.log(song)
+			currentSongIndex = queue.findIndex(obj => JSON.stringify(obj) === JSON.stringify(song));
+			var params = new URLSearchParams(song).toString(); // Convert the song object to query parameters
+			async function saveSong() {
+				try {
+					let response = await fetch("{{url_for('save_track')}}?" +
+					params, { // Append the parameters to the URL
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					});
+					let data = await response.json();
+					console.log('Success:', data);
+					if (checkElement) {
+						console.log('Saved')
+						button.innerHTML =
+							`<svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 24 24"><path fill="currentColor" d="M10 15.688L6.712 12.4l.688-.688l2.6 2.6l6.6-6.6l.688.688L10 15.688Z"/></svg>`
+						button.classList.remove('pr-4')
+						button.classList.add('pr-2')
+					}
+					// Perform more actions here after the response has been received
+				} catch (error) {
+					console.error('Error:', error);
 				}
-				// Perform more actions here after the response has been received
-			} catch (error) {
-			console.error('Error:', error);
 			}
+
+			saveSong();
+
 		}
-
-		saveSong();
-			
 	}
-}
 
 
 
-function playPause() {
-	if (audio.paused) {
-		pausePlayButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M14.5 18q-.402 0-.701-.299q-.299-.3-.299-.701V7q0-.402.299-.701q.3-.299.701-.299H17q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299h-2.5ZM7 18q-.402 0-.701-.299Q6 17.401 6 17V7q0-.402.299-.701Q6.599 6 7 6h2.5q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299H7Zm7.5-1H17V7h-2.5v10ZM7 17h2.5V7H7v10ZM7 7v10V7Zm7.5 0v10V7Z"/></svg>`
-		audio.play();
-	} else {
-		pausePlayButton.innerHTML = `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	function playPause() {
+		if (audio.paused) {
+			pausePlayButton.innerHTML =
+				`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M14.5 18q-.402 0-.701-.299q-.299-.3-.299-.701V7q0-.402.299-.701q.3-.299.701-.299H17q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299h-2.5ZM7 18q-.402 0-.701-.299Q6 17.401 6 17V7q0-.402.299-.701Q6.599 6 7 6h2.5q.402 0 .701.299q.299.3.299.701v10q0 .402-.299.701q-.3.299-.701.299H7Zm7.5-1H17V7h-2.5v10ZM7 17h2.5V7H7v10ZM7 7v10V7Zm7.5 0v10V7Z"/></svg>`
+			audio.play();
+		} else {
+			pausePlayButton.innerHTML = `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 		stroke-linecap="round" stroke-linejoin="round">
 		<polygon points="5 3 19 12 5 21 5 3"></polygon>
 		</svg>`
-		audio.pause();
+			audio.pause();
+		}
 	}
-}
 
-function nextSong() {
-	currentSongIndex++;
-	if (currentSongIndex < queue.length) {
-		playSong(queue[currentSongIndex].track_id);
-	} else {
-		currentSongIndex = 0;
-		playSong(queue[currentSongIndex].track_id);
+	function nextSong() {
+		currentSongIndex++;
+		if (currentSongIndex < queue.length) {
+			playSong(queue[currentSongIndex].track_id);
+		} else {
+			currentSongIndex = 0;
+			playSong(queue[currentSongIndex].track_id);
+		}
 	}
-}
 
-function previousSong() {
-	currentSongIndex--;
-	if (currentSongIndex >= 0) {
-		playSong(queue[currentSongIndex].track_id);
-	} else {
-		currentSongIndex = queue.length - 1;
-		playSong(queue[currentSongIndex].track_id);
+	function previousSong() {
+		currentSongIndex--;
+		if (currentSongIndex >= 0) {
+			playSong(queue[currentSongIndex].track_id);
+		} else {
+			currentSongIndex = queue.length - 1;
+			playSong(queue[currentSongIndex].track_id);
+		}
 	}
-}
 
-function removPreviousSongIcon(){
-	song = queue[currentSongIndex]
+	function removPreviousSongIcon() {
+		song = queue[currentSongIndex]
 
-}
+	}
 
-document.querySelectorAll('.download').forEach(function (button) {
-	button.addEventListener('click', function () {
-		var value = this.getAttribute('data-url');
-		console.log(value)
-		var data = {
-			'url': value
-		};
+	document.querySelectorAll('.download').forEach(function (button) {
+		button.addEventListener('click', function () {
+			var value = this.getAttribute('data-url');
+			console.log(value)
+			var data = {
+				'url': value
+			};
 
-		this.outerHTML = `<button id="downloading"  data-url="${ value }" class="text-gray-500 hover:text-gray-900 flex">
+			this.outerHTML = `<button id="downloading"  data-url="${ value }" class="text-gray-500 hover:text-gray-900 flex">
 			<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_P7sC{transform-origin:center;animation:spinner_svv2 .75s infinite linear}@keyframes spinner_svv2{100%{transform:rotate(360deg)}}</style><path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_P7sC"/></svg>
 			<span class="pl-2 mx-auto">Downloading Album</span>
 		</button>`;
-		
-		var params = new URLSearchParams(data).toString(); 
-		async function downloadAlbum() {
-			try {
-				let response = await fetch("{{url_for('download')}}?" + params, { // Append the parameters to the URL
 
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(data),
-				});
-				let responseData = await response.json(); // Changed variable name to avoid conflict
-				console.log(responseData)
-				
-				console.log(this, button)
-				document.getElementById('downloading').outerHTML = `<button data-url="{ folder_url }" class="text-gray-500 hover:text-gray-900 flex">
+			var params = new URLSearchParams(data).toString();
+			async function downloadAlbum() {
+				try {
+					let response = await fetch("{{url_for('download')}}?" +
+					params, { // Append the parameters to the URL
+
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(data),
+					});
+					let responseData = await response
+				.json(); // Changed variable name to avoid conflict
+					console.log(responseData)
+
+					console.log(this, button)
+					document.getElementById('downloading').outerHTML = `<button data-url="{ folder_url }" class="text-gray-500 hover:text-gray-900 flex">
 					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"/></svg>		
 					<span class="pl-2 p-0 my-auto">Downloaded Album</span>
 				</button>`
-				document.querySelectorAll('.download-track').forEach(function (element) {
-					element.outerHTML = `
+					document.querySelectorAll('.download-track').forEach(function (element) {
+						element.outerHTML = `
 						<button class="focus:outline-none pr-4 group download-track" type="button">
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
 								<path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"/>
 							</svg>
 						</button>
 					`;
-				});				
-				console.log('Success:', responseData)
-				
-			} catch (error) {
-				console.error('Error:', error);
+					});
+					console.log('Success:', responseData)
+
+				} catch (error) {
+					console.error('Error:', error);
+				}
 			}
-		}		
-		
-		downloadAlbum()
+
+			downloadAlbum()
+		});
 	});
-});
-
-
 </script>
 
 </body>
+
 </html>

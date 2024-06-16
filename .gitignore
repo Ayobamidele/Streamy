@@ -7,4 +7,6 @@ myenv
 .vscode/
 .idea/
 static/music/
-tmp/music/track
+tmp/music
+credentials.ini
+file.txt

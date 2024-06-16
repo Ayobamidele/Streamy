@@ -2,11 +2,17 @@ import string
 import os
 import requests
 import re
+import zipfile
+import random
+from mega import Mega
+from dotenv import load_dotenv
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
 from mutagen.mp3 import MP3
 
+load_dotenv()
 
+# Login to Mega
 class WritingMetaTags():
 	def __init__(self, tags, filename):
 		super().__init__()
@@ -80,6 +86,11 @@ class AlbumScraper:
 		self.counter = 0  # Initialize the counter to zero
 		self.session = requests.Session()
 		self.link = link
+		self.upload = True
+		self.email = os.getenv('Mega_email')
+		self.password = os.getenv('Mega_password')
+		self.mega = Mega()
+		self.m = self.mega.login(self.email, self.password)
 		self.headers = {
 			'authority': 'api.spotifydown.com',
 			'accept': '*/*',
@@ -214,34 +225,41 @@ class AlbumScraper:
 	
 
 
-	def scrape_download(self):	
+	def zip_folder(self, folder_path):
+		zip_path = os.path.join(folder_path, os.path.basename(folder_path) + '.zip')
+		with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+			for root, dirs, files in os.walk(folder_path):
+				for file in files:
+					file_path = os.path.join(root, file)
+					if file_path != zip_path:  # Avoid adding the zip file itself
+						zipf.write(file_path, os.path.relpath(file_path, folder_path))
+		return zip_path
+
+	def scrape_download(self):
 		albumID = self.spot_ID()
 		album_link = f'https://api.spotifydown.com/metadata/album/{albumID}'
-		trackList_link = f'https://api.spotifydown.com/trackList/album/{albumID}'		
-		albumName = self.get_AlbumMetadata(f'https://api.spotifydown.com/metadata/album/{albumID}')
+		trackList_link = f'https://api.spotifydown.com/trackList/album/{albumID}'
+		albumName = self.get_AlbumMetadata(album_link)
 		print('Album Name : ', albumName)
-		# Create Folder for Album
-		music_folder = os.path.join(os.getcwd(), "tmp", "music", 'album')
-		if not os.path.exists(music_folder):
-			os.makedirs(music_folder)
+
+		ran_loc = str(random.randint(1000000, 9999999))
+		music_folder = os.path.join(os.getcwd(), "tmp", "music", 'album', ran_loc, f'{albumID}')
+		os.makedirs(music_folder, exist_ok=True)
+
 		try:
 			FolderPath = ''.join(e for e in albumName.get('title') if e.isalnum() or e in [' ', '_'])
 			playlist_folder_path = os.path.join(music_folder, FolderPath)
 		except:
 			playlist_folder_path = music_folder
 
-		if not os.path.exists(playlist_folder_path):
-			os.makedirs(playlist_folder_path)	
+		os.makedirs(playlist_folder_path, exist_ok=True)
 
-		offset_data = {}
-		offset = 0
-		offset_data['offset'] = offset
-
-		while offset is not None:
+		offset_data = {'offset': 0}
+		while offset_data['offset'] is not None:
 			response = self.session.get(url=trackList_link, params=offset_data, headers=self.headers)
 			if response.status_code == 200:
 				Tdata = response.json()['trackList']
-				page = response.json()['nextOffset']
+				offset_data['offset'] = response.json()['nextOffset']
 				print("*" * 100)
 				for count, song in enumerate(Tdata):
 					print(f"[*{count}*] Downloading : ", song['title'], "-", song['artists'])
@@ -301,14 +319,28 @@ class AlbumScraper:
 						except Exception as error_status:
 							print('[*] Error Status Code : ', error_status)
 
-			if page is not None:
-				offset_data['offset'] = page
+			if offset_data['offset'] is not None:
 				response = self.session.get(url=album_link, params=offset_data, headers=self.headers)
 			else:
 				print("*" * 100)
 				print('[*] Download Complete!')
 				print("*" * 100)
-				break
+				zipped_file = self.zip_folder(music_folder)
+				print(f"File Zipped !!!\n\n {zipped_file}")
+				# destination = self.m.create_folder(albumID+ran_loc)
+				# file = self.m.upload(zipped_file, destination)
+				# link = self.m.get_upload_link(file)
+				# print(f"\nDownload link for {albumName}: {link}\n\n")
+				return zipped_file
+			break
 
 
 # Scraper Thread
+	
+def album_download(url: str):
+	album = AlbumScraper(url)
+	album = album.scrape_download()
+	if album is not None: # check if track is not None
+		return album
+	else:
+		return False

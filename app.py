@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify, send_from_directory, abort
 import time
 from flask_session import Session
-from utitlity import detect_and_download
+from utility import detect_and_download
 import os
 import requests
 import json
 from downloaders.track import track_download
+from downloaders.album_dl import album_download
 from functools import wraps
 import base64
 import mutagen
@@ -15,7 +16,8 @@ import eyed3
 from dotenv import load_dotenv
 import socket
 from urllib.parse import urlencode
-
+from pydub import AudioSegment
+from upload import FileBin
 
 # get the hostname of the local machine
 hostname = socket.gethostname()
@@ -346,13 +348,22 @@ def search_form():
 
 @app.route("/download", methods=["POST"])
 def download():
-	url = request.args.to_dict().get("url")  # Convert the query parameters to a dictionary
-	type = "Done"
-	download_in_progress.append(url)
-	print(type)
-	detect_and_download(url)
-	print("Data received: {}".format(type))
-	download_in_progress.remove(url)
+	parameters = request.json
+	if parameters.get('type') == "album":
+		url = f"https://open.spotify.com/album/{parameters.get('id')}"
+		file_url = album_download(url)
+		if file_url != False:
+			upload_file = FileBin(file_url)
+			download_url = upload_file.upload()
+			return {"link": download_url}, 200
+	else:
+		url = request.args.to_dict().get("url")  # Convert the query parameters to a dictionary
+		type = "Done"
+		download_in_progress.append(url)
+		print(type)
+		detect_and_download(url)
+		print("Data received: {}".format(type))
+		download_in_progress.remove(url)
 	return {"message": "Downloaded"}, 200
 
 
@@ -531,7 +542,7 @@ def get_tracks(url):
 			headers={"Authorization": "Bearer " + session["access_token"]},
 		)
 		data = response.json()
-		image = data['images'][0]['url']
+		image = data['images'][0]['url'] if len(data['images']) > 1 else ""
 		for track in data['tracks']['items']:
 			tracks.append({
 				'track_id': track.get('id'),
@@ -559,6 +570,30 @@ def album(id):
 	tracks = get_tracks(url)
 	return render_template("album.html", album=jsonResponse, tracks=tracks)
 
+
+@app.route('/retrieve', methods=['POST'])
+def retrieve():
+	song = request.get_json()
+	if song.get('track_file',False) != False:
+		file_path = song['track_file']
+
+		try:
+			audio = MP3(file_path)
+			sound = AudioSegment.from_mp3(file_path)
+			if sound.rms <= 1000: # replace with your silence threshold
+				os.remove(file_path)
+				return jsonify(isValid=False)
+		except:
+			if os.path.exists(file_path):
+				os.remove(file_path)
+			return jsonify(isValid=False)
+
+		track_download() # Call trackDownload function if file is valid
+	else:
+		track = track_download(song.get("track_url")) # Call trackDownload function if file is valid
+		track = url_for('serve_tmp_file', filename=track[1])
+		return {"message": "Success", "track_path": track}
+	return abort(400, description="Checking files")
 
 
 @app.route('/download_track')
