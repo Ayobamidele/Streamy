@@ -3,16 +3,17 @@ import os
 import json
 import re
 
-# Replace 'your_file_path' with the path to your file
-# Open the file in binary mode
+
+
 class FileBin:
 	def __init__(self, file_path):
-		self.file_path = r'static\image\spotify-header-lg.jpg'
-		self.file_name = 'spotify-header-lg.jpg'
+		self.file_path = file_path
+		self.file_name = os.path.basename(file_path)
 		self.bin = '09cefunin2hpufcs'
 		self.file_size = str(os.path.getsize(file_path))
 		print(f"File size is {self.file_size} bytes")
-	
+		if not self.check_bin():
+			self.get_bin()
  
 	def check_bin(self):
 		headers = {
@@ -59,7 +60,7 @@ class FileBin:
 				}
 			
 			# Send the POST request with the file in the body and filename in the header
-			response = requests.post(f'https://filebin.net/{bin}/{self.file_name}', headers=headers, data=f)
+			response = requests.post(f'https://filebin.net/{self.bin}/{self.file_name}', headers=headers, data=f)
 
 			# Check if the request was successful
 			if response.status_code == 201:
