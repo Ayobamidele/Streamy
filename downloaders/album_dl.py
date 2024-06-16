@@ -4,7 +4,6 @@ import requests
 import re
 import zipfile
 import random
-from mega import Mega
 from dotenv import load_dotenv
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
@@ -87,10 +86,6 @@ class AlbumScraper:
 		self.session = requests.Session()
 		self.link = link
 		self.upload = True
-		self.email = os.getenv('Mega_email')
-		self.password = os.getenv('Mega_password')
-		self.mega = Mega()
-		self.m = self.mega.login(self.email, self.password)
 		self.headers = {
 			'authority': 'api.spotifydown.com',
 			'accept': '*/*',
