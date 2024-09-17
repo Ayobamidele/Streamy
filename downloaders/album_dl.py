@@ -5,7 +5,7 @@ import re
 import random
 from dotenv import load_dotenv
 from downloaders.utility import WritingMetaTags, zip_folder, create_folder
-
+import shutil
 
 load_dotenv()
 
@@ -148,6 +148,17 @@ class AlbumScraper:
 			return x.json()['link']
 		return None
 
+
+	def delete_folder(self, folder_path):
+		if os.path.exists(folder_path):
+			try:
+				shutil.rmtree(folder_path)
+				print(f"Folder '{folder_path}' has been deleted.")
+			except Exception as e:
+				print(f"Error deleting folder: {e}")
+		else:
+			print(f"Folder '{folder_path}' does not exist.")
+
 	def download(self):
 		albumID = self.spot_ID()
 		album_link = f'https://api.spotifydown.com/metadata/album/{albumID}'
@@ -241,6 +252,11 @@ class AlbumScraper:
 				print("*" * 100)
 				zipped_file = zip_folder(music_folder)
 				print(f"File Zipped !!!\n\n {zipped_file}")
+				if os.getenv('FLASK_ENV').lower() == 'production':
+					print("*" * 100)
+					print(f'[*] Deleting "{music_folder}"')
+					self.delete_folder(music_folder)
+					print("*" * 100)
 				return zipped_file
 			break
 
