@@ -42,28 +42,28 @@ download_in_progress = []
 downloaded = {}
 
 def is_silent(file_path, silence_threshold=1000):
-    # Load the audio file
-    y, sr = librosa.load(file_path, sr=None)
+	# Load the audio file
+	y, sr = librosa.load(file_path, sr=None)
 
-    # Compute the RMS value
-    rms = np.sqrt(np.mean(y**2))
+	# Compute the RMS value
+	rms = np.sqrt(np.mean(y**2))
 
-    # Check if the RMS value is below the silence threshold
-    if rms <= silence_threshold:
-        os.remove(file_path)
-        return jsonify(isValid=False)
-    return jsonify(isValid=True)
+	# Check if the RMS value is below the silence threshold
+	if rms <= silence_threshold:
+		os.remove(file_path)
+		return jsonify(isValid=False)
+	return jsonify(isValid=True)
 
 
 def delete_zip_file(zip_file_path):
-    if os.path.exists(zip_file_path):
-        try:
-            os.remove(zip_file_path)
-            print(f"ZIP file '{zip_file_path}' has been deleted.")
-        except Exception as e:
-            print(f"Error deleting ZIP file: {e}")
-    else:
-        print(f"ZIP file '{zip_file_path}' does not exist.")
+	if os.path.exists(zip_file_path):
+		try:
+			os.remove(zip_file_path)
+			print(f"ZIP file '{zip_file_path}' has been deleted.")
+		except Exception as e:
+			print(f"Error deleting ZIP file: {e}")
+	else:
+		print(f"ZIP file '{zip_file_path}' does not exist.")
 
 
 def isMp3Valid(file_path):
@@ -380,6 +380,8 @@ def download():
 		if file_url != False:
 			upload_file = FileBin(file_url)
 			download_url = upload_file.upload()
+			if os.getenv('FLASK_ENV').lower() == 'production':
+				delete_zip_file(file_url)
 			return {"link": download_url}, 200
 	if parameters.get("type") == "playlist":
 		file_url = playlist_download(url)

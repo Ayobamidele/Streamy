@@ -429,6 +429,11 @@ class PlaylistScraper:
 				print("*" * 100)
 				zipped_file = zip_folder(music_folder)
 				print(f"File Zipped !!!\n\n {zipped_file}")
+				if os.getenv('FLASK_ENV').lower() == 'production':
+					print("*" * 100)
+					print(f'[*] Deleting "{music_folder}"')
+					self.delete_folder(music_folder)
+					print("*" * 100)
 				return zipped_file
 
 
