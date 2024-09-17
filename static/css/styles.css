@@ -3,17 +3,18 @@
 @import "https://unpkg.com/open-props/normalize.min.css";
 
 
-html, .home-hero{
+html,
+.home-hero {
 	/* font-family: 'Caveat', cursive !important; */
-	font-family: 'Dela Gothic One', sans-serif!important;
+	font-family: 'Dela Gothic One', sans-serif !important;
 	/* font-family: 'Satisfy', cursive!important; */
 	/* font-family: 'Varela Round', sans-serif!important; */
 
 
 }
 
-.home-hero{
-	background-image: url('..\\image\\spotify-header-lg.jpg');
+.home-hero {
+	background-image: url('..\\image\\b_2.jpg');
 	background-size: cover;
 	background-position: 50%;
 }
@@ -64,7 +65,11 @@ html, .home-hero{
 }
 
 .waitingForConnection3 {
-	animation: blinker3 1s ease-in-out infinite alternate;  
+	animation: blinker3 1s ease-in-out infinite alternate;
 }
 
-@keyframes blinker3 { to { opacity: 0; } }
+@keyframes blinker3 {
+	to {
+		opacity: 0;
+	}
+}

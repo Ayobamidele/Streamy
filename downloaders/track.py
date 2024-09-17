@@ -102,7 +102,7 @@ class AlbumScraper:
 		custom_header = {
 			"authority": "api.spotifydown.com",
 			"method": "POST",
-			"path": '/download/68GdZAAowWDac3SkdNWOwo',
+			"path": f'/download/{track_id}',
 			"scheme": "https",
 			"Accept": "*/*",
 
@@ -370,6 +370,7 @@ class AlbumScraper:
 				songTag.WritingMetaTags()
 			else:
 				print('[*] No Download Link Found.')
+				return None
 
 
 		print("*" * 100)
@@ -423,7 +424,12 @@ def track_download(track_url: str, static: bool = True):
 	track = AlbumScraper(track_url, static=static)
 	track = track.scrape_download()
 	if track is not None: # check if track is not None
+		print(track)
 		return True, track[1] ,track[0]
 	else:
 		return False, None, None
 
+
+# test = AlbumScraper("https://open.spotify.com/track/10Dx5NK7p72jxzg1ZhQ33G")
+# print(test.scrape_download())
+# print(track_download("https://open.spotify.com/track/6DYHWFsSBIj4SFlGmYAAhy"))

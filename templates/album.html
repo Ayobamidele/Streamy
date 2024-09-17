@@ -16,13 +16,13 @@
 	<title>{{ album.name }} - Streamy</title>
 </head>
 
-<body>
+<body class="bg-gray-100">
 	<!-- component -->
-	<div class=" py-5 bg-gray-100 flex flex-col items-center justify-center">
+	<div class=" py-5 flex flex-col items-center justify-center">
 
-		<div class="relative w-4/6 h-36 bg-white rounded-lg shadow-lg overflow-hidde mb-32">
+		<div class="relative w-11/12 h-36 bg-white rounded-lg shadow-lg overflow-hidde mb-32">
 			<div class="absolute inset-0 rounded-lg overflow-hidden bg-red-200">
-				{% if album.images|length > 1 %}
+				{% if album.images|length > 0 %}
 					<img src="{{album.images[0].url}}" alt="{{ album.name }}" class="w-full">
 				{% else %}
 					<img src="" alt="{{ album.name }}" class="w-full">
@@ -32,9 +32,9 @@
 
 				</div>
 			</div>
-			<div class="absolute flex space-x-6 transform translate-x-6 translate-y-8">
+			<div class="absolute flex space-x-6 transform translate-x-6 translate-y-8 w-11/12">
 				<div class="w-36 h-36 rounded-lg shadow-lg overflow-hidden">
-				{% if album.images|length > 1 %}
+				{% if album.images|length > 0 %}
 					<img src="{{album.images[0].url}}" alt="{{ album.name }}" >
 				{% else %}
 					<img src="" alt="{{ album.name }}">
@@ -42,11 +42,13 @@
 
 				</div>
 				<div class="text-white pt-12">
-					<h3 class="font-bold ">{{ album.name }}</h3>
-					<div class="text-sm opacity-60">{{ album.artists[0].name }}</div>
-					<div class="mt-8 text-gray-400">
+					<h3 class="font-bold truncate">{{ album.name }}</h3>
+					<div class="text-sm opacity-60">
+						{{ album.artists[0].name if album.artists else album.owner.display_name }}
+					</div>
+					<div class="mt-8 text-black">
 						<div class="items-center space-x-2 text-xs">
-							<button id="download-album" class="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-neutral-950 px-6 font-medium text-neutral-200" onclick="downloadAlbum('{{album.id|safe}}')">
+							<button id="download-album" data-type="{{ album.type }}" data-url="{{ album.external_urls.spotify }}" class="download group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-neutral-950 px-6 font-medium text-neutral-200" >
 								<span>Download</span>
 								<div class="ml-1 transition group-hover:translate-x-1">
 									<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="transform: rotate(90deg);">
@@ -60,7 +62,7 @@
 			</div>
 		</div>
 
-		<div class="w-4/6 bg-white rounded-lg shadow-lg overflow-hidden">
+		<div class="w-11/12 bg-white rounded-lg shadow-lg overflow-hidden">
 			<div class="relative">
 				<img src="{{album.images[0].url}}"
 					class="object-cover object-bottom min-h-full min-w-full w-full h-52">
@@ -517,21 +519,23 @@
 	document.querySelectorAll('.download').forEach(function (button) {
 		button.addEventListener('click', function () {
 			var value = this.getAttribute('data-url');
+			var data_type = this.getAttribute('data-type');
+			
 			console.log(value)
 			var data = {
-				'url': value
+				'url': value,
+				'type': data_type
 			};
 
-			this.outerHTML = `<button id="downloading"  data-url="${ value }" class="text-gray-500 hover:text-gray-900 flex">
+			this.outerHTML = `<button id="download-album"  data-url="${ value }" class=" flex">
 			<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_P7sC{transform-origin:center;animation:spinner_svv2 .75s infinite linear}@keyframes spinner_svv2{100%{transform:rotate(360deg)}}</style><path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_P7sC"/></svg>
 			<span class="pl-2 mx-auto">Downloading Album</span>
 		</button>`;
 
-			var params = new URLSearchParams(data).toString();
 			async function downloadAlbum() {
 				try {
-					let response = await fetch("{{url_for('download')}}?" +
-					params, { // Append the parameters to the URL
+					let response = await fetch("{{url_for('download')}}",
+					{ // Append the parameters to the URL
 
 						method: 'POST',
 						headers: {
@@ -544,19 +548,39 @@
 					console.log(responseData)
 
 					console.log(this, button)
-					document.getElementById('downloading').outerHTML = `<button data-url="{ folder_url }" class="text-gray-500 hover:text-gray-900 flex">
-					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"/></svg>		
-					<span class="pl-2 p-0 my-auto">Downloaded Album</span>
-				</button>`
-					document.querySelectorAll('.download-track').forEach(function (element) {
-						element.outerHTML = `
-						<button class="focus:outline-none pr-4 group download-track" type="button">
-							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-								<path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"/>
-							</svg>
-						</button>
-					`;
-					});
+					console.log(responseData.link)
+
+					var html_element = `<div class="w-full max-w-sm">
+						<div class="mb-2 flex justify-between items-center">
+							<label for="website-url" class="text-sm font-medium text-gray-900 dark:text-white">Copy & paste link to new tab to download:</label>
+						</div>
+						<div class="flex items-center">
+							<span class="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-white dark:border-gray-600">URL</span>
+							<div class="relative w-full">
+								<input id="website-url" type="text" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-e-0 border-gray-300 text-gray-500 dark:text-gray-400 text-sm border-s-0 focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500" value="${responseData.link}" readonly disabled />
+							</div>
+							
+							<button class="flex-shrink-0 z-10 inline-flex items-center py-3 px-4 text-sm font-medium text-center text-white bg-blue-700 rounded-e-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 border border-blue-700 dark:border-blue-600 hover:border-blue-800 dark:hover:border-blue-700" onclick="copyTextToClipboard('${responseData.link}')" onmouseout="hideTooltip()">
+								<span id="default-icon">
+									<svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+										<path d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm-3 14H5a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2Zm0-4H5a1 1 0 0 1 0-2h8a1 1 0 1 1 0 2Zm0-5H5a1 1 0 0 1 0-2h2V2h4v2h2a1 1 0 1 1 0 2Z"/>
+									</svg>
+								</span>
+								<span id="success-icon" class="hidden inline-flex items-center">
+									<svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+									</svg>
+								</span>
+							</button>
+							<span id="tooltip" class="tooltip absolute invisible bg-black text-white text-sm py-2 px-4 rounded-md z-10 transition-opacity duration-300" style="bottom: 100%; left: 50%; transform: translateX(-50%);">Copied!</span>
+						</div>
+					</div>`;
+					console.log(['album', 'playlist'].includes(data.type))
+					downloadBtn.outerHTML = html_element;
+					document.getElementById("download-album").outerHTML = html_element
+					if (['album', 'playlist'].includes(data.type)){
+						console.log(downloadBtn)
+					}
 					console.log('Success:', responseData)
 
 				} catch (error) {

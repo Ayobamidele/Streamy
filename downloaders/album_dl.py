@@ -2,81 +2,12 @@ import string
 import os
 import requests
 import re
-import zipfile
 import random
 from dotenv import load_dotenv
-from mutagen.easyid3 import EasyID3
-from mutagen.id3 import APIC, ID3
-from mutagen.mp3 import MP3
+from downloaders.utility import WritingMetaTags, zip_folder, create_folder
+
 
 load_dotenv()
-
-# Login to Mega
-class WritingMetaTags():
-	def __init__(self, tags, filename):
-		super().__init__()
-		self.tags = tags
-		self.filename = filename
-		self.PICTUREDATA = None
-		self.url = None
-
-	def setPIC(self):
-		if self.tags['cover'] is None:
-			pass
-		else:
-			try:
-				response = requests.get(self.tags['cover'] + "?size=1", stream=True)
-				if response.status_code == 200:
-					audio = ID3(self.filename)
-					audio['APIC'] = APIC(
-						encoding=3,
-						mime='image/jpeg',
-						type=3,
-						desc=u'Cover',
-						data=response.content
-					)
-					audio.save()
-
-			except Exception as e:
-				print(f"Error adding cover: {e}")
-	
-	def add_flac_cover(self):
-		if self.tags['cover'] is None:
-			pass
-		else:
-			try:
-				response = requests.get(self.tags['cover'] + "?size=1", stream=True)
-				if response.status_code == 200:
-					audio = MP3(self.filename, ID3=ID3)
-					audio.tags.add(
-						APIC(
-							encoding=3,
-							mime="image/jpeg",
-							type=3,
-							desc="Cover",
-							data=response.content,
-						)
-					)
-					audio.save(self.filename, v2_version=3, v1=2)
-			except Exception as e:
-				print(f"Error adding cover: {e}")
-
-	def WritingMetaTags(self):
-		try:
-			# print('[*] FileName : ', self.filename)
-			audio = EasyID3(self.filename)
-			audio['title'] = self.tags.get('title',"")
-			audio['artist'] = self.tags.get('artists',"")
-			audio['album'] = self.tags.get('album',"")
-			audio['date'] = self.tags.get('releaseDate',"")
-			audio.save()
-			self.setPIC()
-			self.add_flac_cover()
-
-		except Exception as e:
-			print(f'Error {e}')
-
-
 
 
 class AlbumScraper:
@@ -216,21 +147,8 @@ class AlbumScraper:
 		if x.status_code == 200:
 			return x.json()['link']
 		return None
-	
-	
 
-
-	def zip_folder(self, folder_path):
-		zip_path = os.path.join(folder_path, os.path.basename(folder_path) + '.zip')
-		with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-			for root, dirs, files in os.walk(folder_path):
-				for file in files:
-					file_path = os.path.join(root, file)
-					if file_path != zip_path:  # Avoid adding the zip file itself
-						zipf.write(file_path, os.path.relpath(file_path, folder_path))
-		return zip_path
-
-	def scrape_download(self):
+	def download(self):
 		albumID = self.spot_ID()
 		album_link = f'https://api.spotifydown.com/metadata/album/{albumID}'
 		trackList_link = f'https://api.spotifydown.com/trackList/album/{albumID}'
@@ -239,15 +157,15 @@ class AlbumScraper:
 
 		ran_loc = str(random.randint(1000000, 9999999))
 		music_folder = os.path.join(os.getcwd(), "tmp", "music", 'album', ran_loc, f'{albumID}')
-		os.makedirs(music_folder, exist_ok=True)
+		create_folder(music_folder)
 
 		try:
 			FolderPath = ''.join(e for e in albumName.get('title') if e.isalnum() or e in [' ', '_'])
-			playlist_folder_path = os.path.join(music_folder, FolderPath)
+			album_folder_path = os.path.join(music_folder, FolderPath)
 		except:
-			playlist_folder_path = music_folder
+			album_folder_path = music_folder
 
-		os.makedirs(playlist_folder_path, exist_ok=True)
+		create_folder(album_folder_path)
 
 		offset_data = {'offset': 0}
 		while offset_data['offset'] is not None:
@@ -260,7 +178,7 @@ class AlbumScraper:
 					print(f"[*{count}*] Downloading : ", song['title'], "-", song['artists'])
 					filename = song['title'].translate(str.maketrans('', '', string.punctuation)) + ' - ' + song[
 						'artists'].translate(str.maketrans('', '', string.punctuation)) + '.mp3'
-					filepath = os.path.join(playlist_folder_path, filename)
+					filepath = os.path.join(album_folder_path, filename)
 					song['cover'] = song.get('cover', albumName.get('cover'))
 					song['cover'] = albumName.get('cover') if song.get('cover') == None else song.get('cover')
 					print(song)
@@ -293,6 +211,7 @@ class AlbumScraper:
 
 							if DL_LINK is not None:
 								## DOWNLOAD
+								print(count,"\n\n", DL_LINK)
 								link = self.session.get(DL_LINK, stream=True)
 								total_size = int(link.headers.get('content-length', 0))
 								block_size = 1024  # 1 Kilobyte
@@ -320,22 +239,17 @@ class AlbumScraper:
 				print("*" * 100)
 				print('[*] Download Complete!')
 				print("*" * 100)
-				zipped_file = self.zip_folder(music_folder)
+				zipped_file = zip_folder(music_folder)
 				print(f"File Zipped !!!\n\n {zipped_file}")
-				# destination = self.m.create_folder(albumID+ran_loc)
-				# file = self.m.upload(zipped_file, destination)
-				# link = self.m.get_upload_link(file)
-				# print(f"\nDownload link for {albumName}: {link}\n\n")
 				return zipped_file
 			break
 
 
-# Scraper Thread
 	
 def album_download(url: str):
 	album = AlbumScraper(url)
-	album = album.scrape_download()
-	if album is not None: # check if track is not None
+	album = album.download()
+	if album is not None:
 		return album
 	else:
 		return False

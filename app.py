@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify, send_from_directory, abort
 import time
 from flask_session import Session
-from utility import detect_and_download
 import os
 import requests
 import json
 from downloaders.track import track_download
 from downloaders.album_dl import album_download
+from downloaders.playlist_dl import playlist_download
 from functools import wraps
 import base64
 import mutagen
@@ -14,13 +14,10 @@ from mutagen.id3 import ID3, ID3NoHeaderError
 from mutagen.mp3 import MP3
 import eyed3
 from dotenv import load_dotenv
-import socket
 from urllib.parse import urlencode
 from pydub import AudioSegment
 from upload import FileBin
 
-# get the hostname of the local machine
-hostname = socket.gethostname()
 load_dotenv()
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -349,21 +346,21 @@ def search_form():
 @app.route("/download", methods=["POST"])
 def download():
 	parameters = request.json
+	url = parameters.get('url')
 	if parameters.get('type') == "album":
-		url = f"https://open.spotify.com/album/{parameters.get('id')}"
 		file_url = album_download(url)
 		if file_url != False:
 			upload_file = FileBin(file_url)
 			download_url = upload_file.upload()
 			return {"link": download_url}, 200
+	if parameters.get("type") == "playlist":
+		file_url = playlist_download(url)
+		if file_url != False:
+			upload_file = FileBin(file_url)
+			download_url = upload_file.upload()
+			return {"link": download_url}, 200
 	else:
-		url = request.args.to_dict().get("url")  # Convert the query parameters to a dictionary
-		type = "Done"
-		download_in_progress.append(url)
-		print(type)
-		detect_and_download(url)
-		print("Data received: {}".format(type))
-		download_in_progress.remove(url)
+		print("working on tracks!")
 	return {"message": "Downloaded"}, 200
 
 
@@ -534,7 +531,7 @@ def calculate_duration(duration_ms):
 	return f"{minutes}:{seconds}"
 
 
-def get_tracks(url):
+def get_tracks(url, album=True):
 	tracks = []
 	while url:
 		response = requests.get(
@@ -542,20 +539,26 @@ def get_tracks(url):
 			headers={"Authorization": "Bearer " + session["access_token"]},
 		)
 		data = response.json()
-		image = data['images'][0]['url'] if len(data['images']) > 1 else ""
+		image = data['images'][0]['url']
 		for track in data['tracks']['items']:
-			tracks.append({
-				'track_id': track.get('id'),
-				'track_images': track.get('images', image),
-				'track_number': track.get('track_number'),
-				'track_title': track.get('name'),
-				'track_duration': calculate_duration(track.get('duration_ms')),
-				'track_url': track.get('external_urls')['spotify'],
-				'track_artists':[i.get("name") for i in track.get('artists')],
-				'track_file': find_file( os.path.join(os.getcwd(), "tmp", "music", 'track'), track['id']),
-			})
+			if track.get('track') == None and  album == False:
+				pass
+			else:
+				tracks.append({
+					'track_id': track.get('id') if album else track['track'].get('id'),
+					'track_images': track.get('images', image) if album else track['track'].get('images', image),
+					'track_number': track.get('track_number') if album else track['track'].get('track_number'),
+					'track_title': track.get('name') if album else track['track'].get('name'),
+					'track_duration': calculate_duration(track.get('duration_ms')) if album else calculate_duration(track['track'].get('duration_ms')),
+					'track_url': track.get('external_urls')['spotify'] if album else track['track'].get('external_urls')['spotify'],
+					'track_artists':[i.get("name") for i in track.get('artists')] if album else [i.get("name") for i in track['track'].get('artists')],
+					'track_file': find_file( os.path.join(os.getcwd(), "static", "music", 'track'), track['id'] if album else track['track']['id']),
+				})
 		url = data.get('next')
+	print(len(tracks))
 	return tracks
+
+
 
 # albums
 @app.route("/album/<id>", methods=["GET", "POST"])
@@ -634,18 +637,31 @@ def serve_tmp_file(filename):
 	return send_from_directory(tmp_folder, filename)
 
 
+
+# playlist
+@app.route("/playlist/<id>", methods=["GET", "POST"])
+@require_valid_token
+def playlist(id):
+	url = f"https://api.spotify.com/v1/playlists/{id}"
+	response = requests.get(
+		url = url,
+		headers={"Authorization": "Bearer " + session["access_token"]},
+	)
+	jsonResponse = json.loads(response.content)
+	tracks = get_tracks(url, album=False)
+	return render_template("album.html", album=jsonResponse, tracks=tracks)
+
+
+
+
 # Run the app when the script is executed
 
 if __name__ == "__main__":
 	if os.getenv('FLASK_ENV') == 'production':
 		pass
-		# Run the app on the production server
-		# app.run(host='0.0.0.0', port=os.getenv('PORT', 5000))
 	else:
 		app.jinja_env.auto_reload = True
 		app.config["TEMPLATES_AUTO_RELOAD"] = True
-		# download_file("https://share33.com/2023/Busta%20Rhymes%20-%20BLOCKBUSTA%20-%20(SongsLover.com).zip", "bigfile.zip")
-		# Run the app on localhost for development
 		app.run(debug=True, host='127.0.0.1', port=5000)
 
 
